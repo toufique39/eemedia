@@ -4,7 +4,6 @@ import 'package:flutter/foundation.dart';
 
 class ScreenTimeService {
   static final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  static const int entertainmentLimitSeconds = 60;
 
   static String _todayKey() {
     final now = DateTime.now();
@@ -34,6 +33,10 @@ class ScreenTimeService {
     required String category,
     required int watchedSeconds,
   }) async {
+    if (await _isProfessional()) {
+      debugPrint("Professional account → Screen time skipped");
+      return;
+    }
     if (watchedSeconds <= 0) return;
 
     final user = FirebaseAuth.instance.currentUser;
@@ -70,6 +73,9 @@ class ScreenTimeService {
   }
 
   static Future<int> getEntertainmentSeconds() async {
+    if (await _isProfessional()) {
+      return 0;
+    }
     final user = FirebaseAuth.instance.currentUser;
 
     if (user == null) return 0;
@@ -90,17 +96,70 @@ class ScreenTimeService {
     return (data['entertainmentSeconds'] ?? 0) as int;
   }
 
+  static Future<bool> _isProfessional() async {
+    final user = FirebaseAuth.instance.currentUser;
+
+    if (user == null) return false;
+
+    final doc = await _firestore.collection('users').doc(user.uid).get();
+
+    if (!doc.exists) return false;
+
+    final accountType = (doc.data()?['accountType'] ?? 'student')
+        .toString()
+        .toLowerCase();
+
+    return accountType == 'professional';
+  }
+
   static Future<bool> hasReachedEntertainmentLimit() async {
+    if (await _isProfessional()) {
+      return false;
+    }
+
     final entertainmentSeconds = await getEntertainmentSeconds();
 
-    return entertainmentSeconds >= entertainmentLimitSeconds;
+    final limit = await getEntertainmentLimit();
+
+    return entertainmentSeconds >= limit;
   }
 
   static Future<int> getRemainingEntertainmentSeconds() async {
+    if (await _isProfessional()) {
+      return 999999;
+    }
+
     final entertainmentSeconds = await getEntertainmentSeconds();
 
-    final remaining = entertainmentLimitSeconds - entertainmentSeconds;
+    final limit = await getEntertainmentLimit();
+
+    final remaining = limit - entertainmentSeconds;
 
     return remaining > 0 ? remaining : 0;
+  }
+
+  static Future<int> getEntertainmentLimit() async {
+    final user = FirebaseAuth.instance.currentUser;
+
+    if (user == null) return 60;
+
+    final userDoc = await _firestore.collection('users').doc(user.uid).get();
+
+    final accountType = userDoc.data()?['accountType'] ?? 'student';
+
+    if (accountType == 'professional') {
+      return 0;
+    }
+
+    final settingsDoc = await _firestore
+        .collection('settings')
+        .doc('app_settings')
+        .get();
+
+    if (!settingsDoc.exists) {
+      return 60;
+    }
+
+    return settingsDoc.data()?['studentEntertainmentLimitSeconds'] ?? 60;
   }
 }

@@ -22,7 +22,7 @@ import 'providers/auth_provider.dart';
 import 'features/auth/screens/login_screen.dart';
 import 'features/auth/screens/register_screen.dart';
 import 'features/auth/screens/account_type_screen.dart';
-import 'features/auth/screens/student_screen.dart';
+
 import 'features/auth/screens/professional_screen.dart';
 import 'features/auth/screens/student_screen_time.dart';
 import 'features/auth/screens/tracking_screen.dart';
@@ -63,7 +63,7 @@ class MyApp extends StatelessWidget {
         routes: {
           '/register': (context) => const RegisterScreen(),
           '/account-type': (context) => const AccountTypeScreen(),
-          '/student-dashboard': (context) => const StudentScreen(),
+
           '/professional-dashboard': (context) => const ProfessionalScreen(),
           '/student-level': (context) => const StudentLevelScreen(),
           '/tracking': (context) => const TrackingScreen(),
