@@ -1,6 +1,7 @@
 import 'package:eemedia/features/auth/screens/login_screen.dart';
 import 'package:eemedia/features/auth/screens/presence_service.dart';
 import 'package:eemedia/features/home/widgets/post_card.dart';
+import 'package:eemedia/features/professional/screens/professional_dashboard_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -77,16 +78,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       "https://ui-avatars.com/api/?name=${data['name'] ?? 'User'}&background=random",
                     ),
                   ),
-                  ElevatedButton(
-                    onPressed: () {
-                      Navigator.pushNamed(context, '/edit-profile');
-                    },
-                    child: Text(
-                      isStudent
-                          ? "Edit Student Profile"
-                          : "Edit Professional Profile",
-                    ),
-                  ),
+
                   const SizedBox(height: 10),
 
                   Text(
@@ -97,16 +89,54 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     ),
                   ),
 
-                  const SizedBox(height: 5),
+                  const SizedBox(height: 10),
 
                   Text(
                     "@${data['username'] ?? ""}",
                     style: const TextStyle(color: Colors.grey),
                   ),
 
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 10),
                   Text(data['bio'] ?? "", textAlign: TextAlign.center),
-                  const SizedBox(height: 12),
+
+                  ElevatedButton(
+                    onPressed: () {
+                      Navigator.pushNamed(context, '/edit-profile');
+                    },
+                    child: Text(
+                      isStudent
+                          ? "Edit Student Profile"
+                          : "Edit Professional Profile",
+                    ),
+                  ),
+                  const SizedBox(height: 5),
+                  if (isProfessional) ...[
+                    const SizedBox(height: 5),
+
+                    SizedBox(
+                      width: 220,
+                      child: ElevatedButton.icon(
+                        icon: const Icon(Icons.dashboard),
+
+                        label: Center(
+                          child: const Text("Professional Dashboard"),
+                        ),
+
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+
+                            MaterialPageRoute(
+                              builder: (_) =>
+                                  const ProfessionalDashboardScreen(),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                  ],
+
+                  const SizedBox(height: 10),
                   Card(
                     margin: const EdgeInsets.symmetric(horizontal: 20),
                     child: Padding(

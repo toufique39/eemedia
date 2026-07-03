@@ -12,6 +12,8 @@ import 'package:eemedia/features/auth/screens/share_screen.dart';
 import 'package:eemedia/features/auth/screens/student_level_screen.dart';
 import 'package:eemedia/features/auth/screens/user_profile_screen.dart';
 import 'package:eemedia/features/home/student_home_screen.dart';
+import 'package:eemedia/features/professional/screens/analytics_screen.dart';
+import 'package:eemedia/features/professional/screens/manage_reels_screen.dart';
 import 'package:eemedia/providers/tracking_provider.dart';
 import 'package:eemedia/services/friend_requests_screen.dart';
 import 'package:flutter/material.dart';
@@ -87,6 +89,9 @@ class MyApp extends StatelessWidget {
             return CommentScreen(postId: postId ?? '');
           },
           '/share': (context) => const ShareScreen(),
+
+          '/manage-reels': (context) => const ManageReelsScreen(),
+          '/analytics': (context) => const AnalyticsScreen(),
         },
       ),
     );
