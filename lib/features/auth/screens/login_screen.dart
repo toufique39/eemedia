@@ -26,7 +26,7 @@ class _LoginScreenState extends State<LoginScreen> {
     final authProvider = Provider.of<MyAuthProvider>(context);
     return Scaffold(
       backgroundColor: Colors.white,
-      body: SafeArea(
+      body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.all(20),
           child: Form(

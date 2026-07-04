@@ -90,7 +90,7 @@ class _ReelItemState extends State<ReelItem> {
     }
 
     try {
-      // ✅ media_kit দিয়ে play — Android এ সব format support করে
+      // ✅ media_kit দিয়ে play — Androd এ সব format support করে
       await _player.open(Media(videoUrl), play: false);
       await _player.setPlaylistMode(PlaylistMode.loop);
 

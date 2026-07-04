@@ -6,29 +6,16 @@ import 'package:http/http.dart' as http;
 
 class RecommendationApiService {
   // ✅ environment variable থেকে IP নাও
-  static const String _pcIpAddress = String.fromEnvironment(
-    'API_IP',
-    defaultValue: '172.17.115.191',
-  );
-
-  static const bool _isProduction = bool.fromEnvironment(
-    'PRODUCTION',
-    defaultValue: false,
-  );
 
   static String get _baseUrl {
-    // ✅ production এ HTTPS
-    if (_isProduction) return 'https://your-api.com';
-
     if (kIsWeb) return 'http://localhost:8000';
 
-    // ✅ Platform আলাদা করো
-    if (!kIsWeb) {
-      if (Platform.isAndroid) return 'http://10.0.2.2:8000';
-      if (Platform.isIOS) return 'http://localhost:8000';
+    // ✅ Real device এ PC এর IP
+    if (Platform.isAndroid || Platform.isIOS) {
+      return 'http://172.17.114.149:8000'; // ipconfig দিয়ে দেখো
     }
 
-    return 'http://$_pcIpAddress:8000';
+    return 'http://localhost:8000';
   }
 
   static Future<List<String>> getRecommendedReelIds({

@@ -19,29 +19,33 @@ class ReactionPicker extends StatelessWidget {
 
     return Dialog(
       backgroundColor: Colors.transparent,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(40),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: reactionsList.map((reaction) {
-            return GestureDetector(
-              onTap: () {
-                Navigator.pop(context);
-                onReactionSelected(reaction['type']!);
-              },
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 6),
-                child: Text(
-                  reaction['emoji']!,
-                  style: const TextStyle(fontSize: 32),
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+          decoration: BoxDecoration(
+            color: Colors.red[100],
+            borderRadius: BorderRadius.circular(40),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: reactionsList.map((reaction) {
+              return GestureDetector(
+                onTap: () {
+                  Navigator.pop(context);
+                  onReactionSelected(reaction['type']!);
+                },
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 6),
+                  child: Text(
+                    reaction['emoji']!,
+                    style: const TextStyle(fontSize: 32),
+                  ),
                 ),
-              ),
-            );
-          }).toList(),
+              );
+            }).toList(),
+          ),
         ),
       ),
     );

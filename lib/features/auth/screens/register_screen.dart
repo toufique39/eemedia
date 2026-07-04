@@ -50,7 +50,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
     return SafeArea(
       child: Scaffold(
         appBar: AppBar(title: const Text("Create Account"), centerTitle: true),
-        body: SafeArea(
+        body: SingleChildScrollView(
           child: Padding(
             padding: const EdgeInsets.all(20),
             child: Form(

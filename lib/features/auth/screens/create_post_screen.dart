@@ -5,7 +5,6 @@ import 'dart:io';
 import 'package:image_picker/image_picker.dart';
 import 'package:eemedia/services/supabase_storage_service.dart';
 import 'package:flutter/foundation.dart';
-import 'package:video_compress/video_compress.dart';
 
 class CreatePostScreen extends StatefulWidget {
   const CreatePostScreen({super.key});
@@ -81,20 +80,6 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
 
     'Religion': ['Islamic', 'Quran', 'Hadith'],
   };
-  Future<File?> _compressVideo(File videoFile) async {
-    try {
-      final MediaInfo? info = await VideoCompress.compressVideo(
-        videoFile.path,
-        quality: VideoQuality.MediumQuality,
-        deleteOrigin: false,
-        includeAudio: true,
-      );
-      return info?.file;
-    } catch (e) {
-      debugPrint('Compress error: $e');
-      return null;
-    }
-  }
 
   final ImagePicker picker = ImagePicker();
   Future<void> pickImage() async {
@@ -127,14 +112,27 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
 
   Future<void> pickVideo() async {
     final pickedFile = await picker.pickVideo(source: ImageSource.gallery);
+
     if (pickedFile == null) return;
 
-    // ✅ compress করো আগে
-    final compressed = await _compressVideo(File(pickedFile.path));
+    if (kIsWeb) {
+      final bytes = await pickedFile.readAsBytes();
 
-    setState(() {
-      selectedVideo = compressed ?? File(pickedFile.path);
-    });
+      setState(() {
+        webVideo = bytes;
+        selectedVideo = null;
+        webImage = null;
+        selectedImage = null;
+      });
+    } else {
+      setState(() {
+        selectedVideo = File(pickedFile.path);
+
+        webVideo = null;
+        webImage = null;
+        selectedImage = null;
+      });
+    }
   }
 
   Future<void> uploadReel() async {
@@ -300,9 +298,10 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text("Create Post")),
-      body: Padding(
-        padding: const EdgeInsets.all(16),
-        child: SafeArea(
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+
           child: Column(
             children: [
               TextField(
@@ -355,7 +354,6 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
 
                   onChanged: (value) {
                     setState(() {
-                      selectedCategory = null;
                       selectedSubCategory = value;
                     });
                   },
