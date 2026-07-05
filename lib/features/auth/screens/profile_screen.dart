@@ -2,6 +2,7 @@ import 'package:eemedia/features/auth/screens/login_screen.dart';
 import 'package:eemedia/features/auth/screens/presence_service.dart';
 import 'package:eemedia/features/home/widgets/post_card.dart';
 import 'package:eemedia/features/professional/screens/professional_dashboard_screen.dart';
+import 'package:eemedia/services/screen_time_service.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -64,40 +65,118 @@ class _ProfileScreenState extends State<ProfileScreen> {
               }
 
               final data = snapshot.data!.data() as Map<String, dynamic>;
-              final accountType = data['accountType'] ?? 'student';
+              final accountType = (data["accountType"] ?? "student")
+                  .toString()
+                  .toLowerCase();
 
-              final isStudent = accountType == 'student';
+              final isStudent = accountType == "student";
 
               final isProfessional = accountType == 'professional';
 
               return Column(
                 children: [
                   CircleAvatar(
-                    radius: 50,
+                    radius: 30,
                     backgroundImage: NetworkImage(
                       "https://ui-avatars.com/api/?name=${data['name'] ?? 'User'}&background=random",
                     ),
                   ),
 
-                  const SizedBox(height: 10),
+                  const SizedBox(height: 5),
 
                   Text(
                     data['name'] ?? "",
                     style: const TextStyle(
-                      fontSize: 20,
+                      fontSize: 14,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
 
-                  const SizedBox(height: 10),
+                  const SizedBox(height: 5),
 
                   Text(
                     "@${data['username'] ?? ""}",
                     style: const TextStyle(color: Colors.grey),
                   ),
 
-                  const SizedBox(height: 10),
-                  Text(data['bio'] ?? "", textAlign: TextAlign.center),
+                  const SizedBox(height: 5),
+                  Text(
+                    data['bio'] ?? "",
+                    style: const TextStyle(color: Colors.grey),
+                  ),
+                  if (isStudent)
+                    FutureBuilder<List<int>>(
+                      future: Future.wait([
+                        ScreenTimeService.getEntertainmentSeconds(),
+                        ScreenTimeService.getRemainingEntertainmentSeconds(),
+                        Future.value(
+                          ScreenTimeService.entertainmentLimitSeconds,
+                        ),
+                      ]),
+
+                      builder: (context, snapshot) {
+                        if (!snapshot.hasData) {
+                          return const SizedBox();
+                        }
+
+                        final used = snapshot.data![0];
+
+                        final limit = snapshot.data![1];
+
+                        return Card(
+                          margin: const EdgeInsets.symmetric(
+                            horizontal: 14,
+                            vertical: 10,
+                          ),
+
+                          elevation: 2,
+
+                          child: Padding(
+                            padding: const EdgeInsets.all(10),
+
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+
+                              children: [
+                                const Row(
+                                  children: [
+                                    Icon(Icons.timer, color: Colors.orange),
+
+                                    SizedBox(width: 5),
+
+                                    Text(
+                                      "Today's Entertainment",
+
+                                      style: TextStyle(
+                                        fontSize: 12,
+
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+
+                                const SizedBox(height: 5),
+
+                                LinearProgressIndicator(
+                                  value: limit == 0 ? 0 : used / limit,
+                                ),
+
+                                const SizedBox(height: 5),
+
+                                Text(
+                                  "Limit : ${ScreenTimeService.formatDuration(ScreenTimeService.entertainmentLimitSeconds)}",
+
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        );
+                      },
+                    ),
 
                   ElevatedButton(
                     onPressed: () {
@@ -136,11 +215,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     ),
                   ],
 
-                  const SizedBox(height: 10),
+                  const SizedBox(height: 5),
                   Card(
-                    margin: const EdgeInsets.symmetric(horizontal: 20),
+                    margin: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 5,
+                    ),
                     child: Padding(
-                      padding: const EdgeInsets.all(16),
+                      padding: const EdgeInsets.all(10),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -148,39 +230,39 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             Row(
                               children: [
                                 const Icon(Icons.school),
-                                const SizedBox(width: 8),
+                                const SizedBox(width: 5),
                                 Text(data['studentLevel'] ?? ''),
                               ],
                             ),
 
-                            const SizedBox(height: 10),
+                            const SizedBox(height: 5),
 
                             Row(
                               children: [
                                 const Icon(Icons.account_balance),
-                                const SizedBox(width: 8),
+                                const SizedBox(width: 5),
                                 Expanded(
                                   child: Text(data['institution'] ?? ''),
                                 ),
                               ],
                             ),
 
-                            const SizedBox(height: 10),
+                            const SizedBox(height: 5),
 
                             Row(
                               children: [
                                 const Icon(Icons.menu_book),
-                                const SizedBox(width: 8),
+                                const SizedBox(width: 5),
                                 Expanded(child: Text(data['department'] ?? '')),
                               ],
                             ),
 
-                            const SizedBox(height: 10),
+                            const SizedBox(height: 5),
 
                             Row(
                               children: [
                                 const Icon(Icons.calendar_today),
-                                const SizedBox(width: 8),
+                                const SizedBox(width: 5),
                                 Text(data['session'] ?? ''),
                               ],
                             ),
@@ -190,55 +272,35 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             Row(
                               children: [
                                 const Icon(Icons.work),
-                                const SizedBox(width: 8),
+                                const SizedBox(width: 5),
                                 Expanded(child: Text(data['profession'] ?? '')),
                               ],
                             ),
 
-                            const SizedBox(height: 10),
+                            const SizedBox(height: 5),
 
                             Row(
                               children: [
                                 const Icon(Icons.business),
-                                const SizedBox(width: 8),
+                                const SizedBox(width: 5),
                                 Expanded(
                                   child: Text(data['organization'] ?? ''),
                                 ),
                               ],
                             ),
 
-                            const SizedBox(height: 10),
+                            const SizedBox(height: 5),
 
                             Row(
                               children: [
                                 const Icon(Icons.badge),
-                                const SizedBox(width: 8),
+                                const SizedBox(width: 5),
                                 Expanded(child: Text(data['jobTitle'] ?? '')),
                               ],
                             ),
                           ],
                         ],
                       ),
-                    ),
-                  ),
-
-                  Container(
-                    margin: const EdgeInsets.only(top: 12),
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 14,
-                      vertical: 6,
-                    ),
-                    decoration: BoxDecoration(
-                      color: isStudent
-                          ? Colors.blue.shade100
-                          : Colors.orange.shade100,
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Text(
-                      isStudent
-                          ? "🎓 Student Account"
-                          : "💼 Professional Account",
-                      style: const TextStyle(fontWeight: FontWeight.bold),
                     ),
                   ),
                 ],
