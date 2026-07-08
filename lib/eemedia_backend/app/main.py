@@ -1,32 +1,47 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.routers.recommendations import router as recommendations_router
+# Import API Routers
+from app.api.ai_routes import router as ai_router
+from app.api.recommendation_routes import router as recommendation_router
 
 app = FastAPI(
-    title="EEmedia Recommendation API",
+    title="EEmedia Backend API",
+    description="AI Powered Social Media Backend",
     version="1.0.0",
-    description=(
-        "Backend API for EEmedia video recommendation system."
-    ),
 )
 
-# Development CORS configuration.
-# Production-এ allowed_origins নির্দিষ্ট domain দিয়ে replace করবো।
+# -----------------------------
+# CORS
+# -----------------------------
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=False,
-    allow_methods=["GET", "POST"],
+    allow_origins=["*"],   # Production এ নিজের Domain দেবে
+    allow_credentials=True,
+    allow_methods=["*"],
     allow_headers=["*"],
 )
 
-app.include_router(recommendations_router)
-
-
-@app.get("/health")
-async def health_check() -> dict:
+# -----------------------------
+# Root Route
+# -----------------------------
+@app.get("/")
+def root():
     return {
-        "status": "ok",
-        "service": "eemedia-recommendation-api",
+        "message": "Welcome to EEmedia Backend 🚀"
     }
+
+# -----------------------------
+# Health Check
+# -----------------------------
+@app.get("/health")
+def health():
+    return {
+        "status": "ok"
+    }
+
+# -----------------------------
+# Include Routers
+# -----------------------------
+app.include_router(ai_router)
+app.include_router(recommendation_router)

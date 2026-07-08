@@ -95,11 +95,10 @@ class ScreenTimeService {
   }
 
   static Future<bool> hasReachedEntertainmentLimit() async {
-    if (await _isProfessional()) {
-      return false;
-    }
-
     final entertainmentSeconds = await getEntertainmentSeconds();
+
+    debugPrint("WATCHED = $entertainmentSeconds");
+    debugPrint("LIMIT = $entertainmentLimitSeconds");
 
     return entertainmentSeconds >= entertainmentLimitSeconds;
   }

@@ -14,6 +14,7 @@ import 'package:eemedia/features/auth/screens/user_profile_screen.dart';
 import 'package:eemedia/features/home/student_home_screen.dart';
 import 'package:eemedia/features/professional/screens/analytics_screen.dart';
 import 'package:eemedia/features/professional/screens/manage_reels_screen.dart';
+import 'package:eemedia/providers/screen_time_provider.dart';
 import 'package:eemedia/providers/tracking_provider.dart';
 import 'package:eemedia/services/friend_requests_screen.dart';
 import 'package:flutter/material.dart';
@@ -55,6 +56,7 @@ class MyApp extends StatelessWidget {
       providers: [
         ChangeNotifierProvider(create: (_) => MyAuthProvider()),
         ChangeNotifierProvider(create: (_) => TrackingProvider()),
+        ChangeNotifierProvider(create: (_) => ScreenTimeProvider()),
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,

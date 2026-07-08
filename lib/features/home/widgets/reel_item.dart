@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:eemedia/features/home/widgets/reaction_picker.dart';
+import 'package:eemedia/providers/screen_time_provider.dart';
 import 'package:eemedia/services/interaction_service.dart';
 import 'package:eemedia/services/reaction_service.dart' as reaction_service;
 import 'package:eemedia/services/reel_service.dart';
@@ -8,17 +9,20 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:media_kit/media_kit.dart';
 import 'package:media_kit_video/media_kit_video.dart';
+import 'package:provider/provider.dart';
 
 class ReelItem extends StatefulWidget {
   final Map<String, dynamic> reelData;
   final String reelId;
   final bool isActive;
+  final VoidCallback? onLimitReached;
 
   const ReelItem({
     super.key,
-    required this.reelData,
     required this.reelId,
+    required this.reelData,
     required this.isActive,
+    this.onLimitReached,
   });
 
   @override
@@ -43,7 +47,6 @@ class _ReelItemState extends State<ReelItem> {
   @override
   void initState() {
     super.initState();
-
     _player = Player();
     _videoController = VideoController(_player);
 
@@ -63,8 +66,13 @@ class _ReelItemState extends State<ReelItem> {
     if (widget.isActive == oldWidget.isActive) return;
 
     if (widget.isActive) {
-      _player.play();
-      _startWatchTimer();
+      // ✅ initialize হয়েছে কিনা check করো
+      if (_player.state.playlist.medias.isEmpty) {
+        _initializeAndPlayVideo();
+      } else {
+        _player.play();
+        _startWatchTimer();
+      }
     } else {
       _player.pause();
       _pauseAndSaveWatchData();
@@ -90,7 +98,6 @@ class _ReelItemState extends State<ReelItem> {
     }
 
     try {
-      // ✅ media_kit দিয়ে play — Androd এ সব format support করে
       await _player.open(Media(videoUrl), play: false);
       await _player.setPlaylistMode(PlaylistMode.loop);
 
@@ -126,21 +133,42 @@ class _ReelItemState extends State<ReelItem> {
     _saveWatchData();
   }
 
+  // ✅ async সরানো হলো — dispose safe
   void _saveWatchData() {
     if (_watchInteractionSaved || _watchedSeconds <= 0) return;
 
     final secondsToSave = _watchedSeconds;
+    // ✅ 'category' — 'finalCategory' না
     final category = widget.reelData['category']?.toString() ?? 'Other';
     final subCategory = widget.reelData['subCategory']?.toString() ?? '';
     final reelId = widget.reelId;
 
     _watchedSeconds = 0;
-    _watchInteractionSaved = true;
+    _watchInteractionSaved = true; // ✅ reset করো
 
-    ScreenTimeService.addWatchTime(
-      category: category,
-      watchedSeconds: secondsToSave,
-    ).catchError((e) => debugPrint('Screen time error: $e'));
+    // ✅ mounted হলে provider use করো
+    if (mounted) {
+      final provider = context.read<ScreenTimeProvider>();
+      provider
+          .addWatchTime(category: category, watchedSeconds: secondsToSave)
+          .then((_) {
+            if (provider.limitReached) {
+              if (mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text("Educational Mode Activated")),
+                );
+              }
+            }
+            debugPrint("LIMIT REACHED = ${provider.limitReached}");
+            debugPrint("SECONDS = ${provider.entertainmentSeconds}");
+          })
+          .catchError((e) => debugPrint('Screen time error: $e'));
+    } else {
+      ScreenTimeService.addWatchTime(
+        category: category,
+        watchedSeconds: secondsToSave,
+      ).catchError((e) => debugPrint('Screen time error: $e'));
+    }
 
     InteractionService.logInteraction(
       reelId: reelId,
@@ -200,7 +228,7 @@ class _ReelItemState extends State<ReelItem> {
     _isDisposed = true;
     _watchTimer?.cancel();
     _saveWatchData();
-    _player.dispose(); // ✅ player dispose
+    _player.dispose();
     super.dispose();
   }
 
@@ -223,7 +251,6 @@ class _ReelItemState extends State<ReelItem> {
     return Stack(
       fit: StackFit.expand,
       children: [
-        // ✅ media_kit Video widget
         GestureDetector(
           onTap: () {
             _player.state.playing ? _player.pause() : _player.play();
@@ -232,11 +259,10 @@ class _ReelItemState extends State<ReelItem> {
           child: Video(
             controller: _videoController,
             fit: BoxFit.cover,
-            controls: NoVideoControls, // ✅ custom UI ব্যবহার করো
+            controls: NoVideoControls,
           ),
         ),
 
-        // ✅ Play/Pause indicator
         StreamBuilder<bool>(
           stream: _player.stream.playing,
           builder: (context, snapshot) {
@@ -248,7 +274,6 @@ class _ReelItemState extends State<ReelItem> {
           },
         ),
 
-        // User info
         Positioned(
           left: 12,
           bottom: 100,
@@ -299,7 +324,6 @@ class _ReelItemState extends State<ReelItem> {
           ),
         ),
 
-        // Action buttons
         Positioned(
           right: 12,
           bottom: 90,
@@ -373,7 +397,6 @@ class _ReelItemState extends State<ReelItem> {
           ),
         ),
 
-        // Back button
         Positioned(
           left: MediaQuery.of(context).size.width * 0.05,
           top: 10,

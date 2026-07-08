@@ -1,3 +1,5 @@
+import 'package:eemedia/eemedia_backend/app/services/ai_service.dart';
+
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -23,27 +25,7 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
   String? selectedCategory;
   String? selectedSubCategory;
 
-  final List<String> reelCategories = [
-    'Education',
-
-    'Entertainment',
-
-    'News',
-
-    'Technology',
-
-    'Sports',
-
-    'Gaming',
-
-    'Business',
-
-    'Health',
-
-    'Motivation',
-
-    'Religion',
-  ];
+  final List<String> reelCategories = ['Education', 'Entertainment'];
   final Map<String, List<String>> subCategories = {
     'Education': [
       'School',
@@ -58,27 +40,6 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
     ],
 
     'Entertainment': ['Funny', 'Movies', 'Music', 'Prank', 'Memes'],
-
-    'News': [
-      'Local News',
-      'International News',
-      'Technology News',
-      'Sports News',
-    ],
-
-    'Technology': ['AI', 'Programming', 'Cyber Security', 'Gadgets'],
-
-    'Sports': ['Football', 'Cricket', 'Badminton', 'Esports'],
-
-    'Gaming': ['PUBG', 'Free Fire', 'Valorant', 'PC Gaming'],
-
-    'Business': ['Startup', 'Marketing', 'Finance'],
-
-    'Health': ['Fitness', 'Nutrition', 'Mental Health'],
-
-    'Motivation': ['Study Motivation', 'Career', 'Life Advice'],
-
-    'Religion': ['Islamic', 'Quran', 'Hadith'],
   };
 
   final ImagePicker picker = ImagePicker();
@@ -232,9 +193,15 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
       }
 
       if (selectedVideo != null || webVideo != null) {
-        await FirebaseFirestore.instance.collection('reels').add({
-          'category': selectedCategory,
-          'subCategory': selectedSubCategory,
+        debugPrint("========== STEP-1 ==========");
+        final reelDoc = FirebaseFirestore.instance.collection('reels').doc();
+
+        await reelDoc.set({
+          'userCategory': selectedCategory,
+          'aiCategory': null,
+          'finalCategory': null,
+          'status': 'processing',
+          'aiProcessed': false,
           'userId': currentUser.uid,
           'userData': currentUserData,
           'caption': _controller.text.trim(),
@@ -242,6 +209,9 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
           'likes': [],
           'createdAt': FieldValue.serverTimestamp(),
         });
+        debugPrint("========== STEP-2 ==========");
+        AiService.classifyReel(reelId: reelDoc.id, videoUrl: videoUrl);
+        debugPrint("========== STEP-3 ==========");
       } else {
         await FirebaseFirestore.instance.collection('posts').add({
           'userId': currentUser.uid,
@@ -252,6 +222,7 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
           'createdAt': FieldValue.serverTimestamp(),
         });
       }
+
       _controller.clear();
 
       setState(() {
