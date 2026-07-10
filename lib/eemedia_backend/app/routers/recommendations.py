@@ -1,8 +1,6 @@
 import logging
 from fastapi import APIRouter, HTTPException
-
 from httpx import request 
-
 from app.schemas import (
     RecommendationRequest,
     RecommendationResponse,

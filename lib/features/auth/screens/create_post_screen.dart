@@ -27,19 +27,17 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
 
   final List<String> reelCategories = ['Education', 'Entertainment'];
   final Map<String, List<String>> subCategories = {
-    'Education': [
-      'School',
-      'College',
-      'University',
-      'Programming',
-      'AI',
-      'IoT',
-      'Robotics',
-      'Math',
-      'Physics',
-    ],
+    'Education': ['School', 'College', 'University'],
 
-    'Entertainment': ['Funny', 'Movies', 'Music', 'Prank', 'Memes'],
+    'Entertainment': [
+      'Funny',
+      'Nature',
+      'sports',
+      'Movies',
+      'Music',
+      'Prank',
+      'Memes',
+    ],
   };
 
   final ImagePicker picker = ImagePicker();

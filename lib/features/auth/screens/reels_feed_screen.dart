@@ -1,7 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-
+import 'package:eemedia/eemedia_backend/app/services/recommendation_api_service.dart';
 import 'package:eemedia/features/home/widgets/reel_item.dart';
-
+import 'package:eemedia/providers/recommendation_provider.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../providers/screen_time_provider.dart';
@@ -18,8 +19,8 @@ class ReelsFeedScreen extends StatefulWidget {
 class _ReelsFeedScreenState extends State<ReelsFeedScreen> {
   bool _isLoadingData = true;
   List<String> _recommendedReelIds = [];
-  late final PageController _pageController; // ✅
-  int _currentIndex = 0; // ✅
+  late final PageController _pageController;
+  int _currentIndex = 0;
 
   @override
   void initState() {
@@ -28,7 +29,6 @@ class _ReelsFeedScreenState extends State<ReelsFeedScreen> {
 
     _loadFeedDependencies();
 
-    // ✅ build এর বাইরে provider refresh
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) context.read<ScreenTimeProvider>().refresh();
     });
@@ -62,50 +62,83 @@ class _ReelsFeedScreenState extends State<ReelsFeedScreen> {
   }
 
   Future<void> _loadFeedDependencies() async {
-    if (mounted) {
-      setState(() {
-        _isLoadingData = true;
-      });
+    if (mounted) setState(() => _isLoadingData = true);
+
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) {
+      if (mounted) setState(() => _isLoadingData = false);
+      return;
     }
 
-    // Recommendation আপাতত Disable
-    _recommendedReelIds = [];
+    try {
+      // ✅ Future.wait সরিয়ে সরাসরি await
+      final ids = await RecommendationApiService.getRecommendedReelIds(
+        userId: user.uid,
+        limit: 30,
+      );
 
-    if (mounted) {
+      if (!mounted) return;
       setState(() {
+        _recommendedReelIds = ids;
         _isLoadingData = false;
       });
+    } catch (e) {
+      debugPrint('Error loading feed: $e');
+      if (mounted) setState(() => _isLoadingData = false);
     }
   }
 
   List<QueryDocumentSnapshot> _processFeed({
-  required List<QueryDocumentSnapshot> allReels,
-  required bool isLimitReached,
-}) {
+    required List<QueryDocumentSnapshot> allReels,
+    required List<String> recommendedIds,
+    required bool isLimitReached,
+  }) {
+    List<QueryDocumentSnapshot> baseFeed = [];
 
-  if (!isLimitReached) {
-    return allReels;
+    if (recommendedIds.isNotEmpty) {
+      final reelsById = {for (final reel in allReels) reel.id: reel};
+      baseFeed = recommendedIds
+          .where(reelsById.containsKey)
+          .map((id) => reelsById[id]!)
+          .toList();
+    }
+
+    if (baseFeed.isEmpty) {
+      baseFeed = List<QueryDocumentSnapshot>.from(allReels);
+    }
+
+    if (isLimitReached) {
+      debugPrint("===== LIMIT REACHED =====");
+      return baseFeed.where((doc) {
+        final data = doc.data() as Map<String, dynamic>;
+        final category = data["finalCategory"]?.toString().toLowerCase();
+
+        return category == "education";
+      }).toList();
+    }
+
+    return baseFeed;
   }
 
-  final educationalReels = allReels.where((doc) {
+  int _lastRefreshVersion = 0;
 
-    final data = doc.data() as Map<String, dynamic>;
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
 
-    final category =
-        (data["finalCategory"] ?? "")
-            .toString()
-            .toLowerCase();
+    final version = context.watch<RecommendationProvider>().refreshVersion;
 
-    return category == "education";
+    if (version != _lastRefreshVersion) {
+      _lastRefreshVersion = version;
 
-  }).toList();
-
-  return educationalReels;
-}
+      _loadFeedDependencies();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     final screenProvider = context.watch<ScreenTimeProvider>();
+    final recommendationProvider = context.watch<RecommendationProvider>();
 
     // ✅ loading screen
     if (_isLoadingData) {
@@ -120,7 +153,7 @@ class _ReelsFeedScreenState extends State<ReelsFeedScreen> {
       body: StreamBuilder<QuerySnapshot>(
         stream: FirebaseFirestore.instance
             .collection('reels')
-           
+            .orderBy('createdAt', descending: true)
             .snapshots(),
         builder: (context, snapshot) {
           if (snapshot.hasError) {
@@ -148,7 +181,7 @@ class _ReelsFeedScreenState extends State<ReelsFeedScreen> {
 
           final finalReels = _processFeed(
             allReels: allReels,
-           
+            recommendedIds: _recommendedReelIds,
             isLimitReached: screenProvider.limitReached,
           );
 

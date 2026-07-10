@@ -1,26 +1,54 @@
 from fastapi import APIRouter
 from pydantic import BaseModel
 
+from app.services.recommendation_service import (
+    get_recommendations,
+)
+
 router = APIRouter(
+
     prefix="/api/v1/recommendations",
+
     tags=["Recommendations"],
+
 )
 
 
 class RecommendationRequest(BaseModel):
+
     user_id: str
-    limit: int = 20
+
+    limit: int = 30
 
 
 @router.post("/reels")
-async def get_recommendations(request: RecommendationRequest):
-    """
-    Temporary Recommendation API
-    পরে এখানে AI Recommendation Engine যুক্ত হবে।
-    """
 
+def recommend_reels(
+
+    request: RecommendationRequest,
+
+):
+
+    reels = get_recommendations(
+
+        request.user_id,
+
+        request.limit,
+
+    )
+    recommended_ids = []
+    for item in reels:
+
+      recommended_ids.append(
+
+        item["id"]
+
+    )
+    
     return {
-        "success": True,
-        "recommended_reel_ids": [],
-        "message": "Recommendation API is working."
-    }
+
+    "recommended_reel_ids":
+
+        recommended_ids
+
+}

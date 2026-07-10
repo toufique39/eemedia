@@ -33,7 +33,7 @@ class ScreenTimeProvider extends ChangeNotifier {
     required int watchedSeconds,
   }) async {
     await ScreenTimeService.addWatchTime(
-      category: category,
+      finalcategory: category,
       watchedSeconds: watchedSeconds,
     );
 

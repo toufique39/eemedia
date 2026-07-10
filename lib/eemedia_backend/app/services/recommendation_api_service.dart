@@ -12,7 +12,7 @@ class RecommendationApiService {
 
     // ✅ Real device এ PC এর IP
     if (Platform.isAndroid || Platform.isIOS) {
-      return 'http://172.17.114.149:8000'; // ipconfig দিয়ে দেখো
+      return 'http://172.17.114.149:8000';
     }
 
     return 'http://localhost:8000';
@@ -63,11 +63,11 @@ class RecommendationApiService {
       } on TimeoutException catch (e) {
         debugPrint('Attempt ${attempt + 1}: Timeout — $e');
         if (attempt == retries) return [];
-        // ✅ exponential backoff
+
         await Future.delayed(Duration(seconds: attempt + 1));
       } on FormatException catch (e) {
         debugPrint('JSON parse error: $e');
-        return []; // retry করার দরকার নেই
+        return [];
       } catch (e) {
         debugPrint('Attempt ${attempt + 1}: Error — $e');
         if (attempt == retries) return [];

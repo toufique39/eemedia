@@ -11,6 +11,7 @@ def log_ai_success(
     category: str,
     confidence: float,
     processing_time: float,
+   
 ):
 
     db.collection("ai_logs").add({
@@ -18,7 +19,7 @@ def log_ai_success(
         "reelId": reel_id,
 
         "userId": user_id,
-
+         
         "aiCategory": category,
 
         "confidence": confidence,

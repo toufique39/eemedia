@@ -15,25 +15,32 @@ class ScreenTimeService {
   }
 
   static String _getCategoryField(String category) {
-    switch (category.toLowerCase()) {
-      case 'entertainment':
-        return 'entertainmentSeconds';
+    debugPrint("INPUT CATEGORY = $category");
 
-      case 'education':
-        return 'educationSeconds';
+    final value = category.trim().toLowerCase();
 
-      case 'news':
-        return 'newsSeconds';
+    debugPrint("NORMALIZED = $value");
+
+    switch (value) {
+      case "education":
+        return "educationSeconds";
+
+      case "entertainment":
+        return "entertainmentSeconds";
+
+      case "news":
+        return "newsSeconds";
 
       default:
-        return 'otherSeconds';
+        return "otherSeconds";
     }
   }
 
   static Future<void> addWatchTime({
-    required String category,
+    required String finalcategory,
     required int watchedSeconds,
   }) async {
+    debugPrint("CATEGORY RECEIVED = $finalcategory");
     if (await _isProfessional()) {
       debugPrint("Professional account → Screen time skipped");
       return;
@@ -55,14 +62,13 @@ class ScreenTimeService {
         'date': today,
         'entertainmentSeconds': 0,
         'educationSeconds': 0,
-        'newsSeconds': 0,
         'otherSeconds': 0,
         'totalReelSeconds': 0,
         'updatedAt': FieldValue.serverTimestamp(),
       });
     }
 
-    final categoryField = _getCategoryField(category);
+    final categoryField = _getCategoryField(finalcategory);
 
     await docRef.update({
       categoryField: FieldValue.increment(watchedSeconds),
@@ -70,7 +76,7 @@ class ScreenTimeService {
       'updatedAt': FieldValue.serverTimestamp(),
     });
 
-    debugPrint('SCREEN TIME SAVED → $category : $watchedSeconds seconds');
+    debugPrint('SCREEN TIME SAVED → $finalcategory : $watchedSeconds seconds');
   }
 
   static Future<int> getEntertainmentSeconds() async {

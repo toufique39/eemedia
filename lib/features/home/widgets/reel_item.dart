@@ -66,7 +66,6 @@ class _ReelItemState extends State<ReelItem> {
     if (widget.isActive == oldWidget.isActive) return;
 
     if (widget.isActive) {
-      // ✅ initialize হয়েছে কিনা check করো
       if (_player.state.playlist.medias.isEmpty) {
         _initializeAndPlayVideo();
       } else {
@@ -133,20 +132,21 @@ class _ReelItemState extends State<ReelItem> {
     _saveWatchData();
   }
 
-  // ✅ async সরানো হলো — dispose safe
   void _saveWatchData() {
     if (_watchInteractionSaved || _watchedSeconds <= 0) return;
 
     final secondsToSave = _watchedSeconds;
-    // ✅ 'category' — 'finalCategory' না
-    final category = widget.reelData['category']?.toString() ?? 'Other';
+
+    final category =
+        widget.reelData['finalCategory']?.toString() ??
+        widget.reelData['userCategory']?.toString() ??
+        'Other';
     final subCategory = widget.reelData['subCategory']?.toString() ?? '';
     final reelId = widget.reelId;
-
+    debugPrint(widget.reelData.toString());
     _watchedSeconds = 0;
-    _watchInteractionSaved = true; // ✅ reset করো
+    _watchInteractionSaved = true;
 
-    // ✅ mounted হলে provider use করো
     if (mounted) {
       final provider = context.read<ScreenTimeProvider>();
       provider
@@ -165,7 +165,7 @@ class _ReelItemState extends State<ReelItem> {
           .catchError((e) => debugPrint('Screen time error: $e'));
     } else {
       ScreenTimeService.addWatchTime(
-        category: category,
+        finalcategory: category,
         watchedSeconds: secondsToSave,
       ).catchError((e) => debugPrint('Screen time error: $e'));
     }
@@ -174,7 +174,7 @@ class _ReelItemState extends State<ReelItem> {
       reelId: reelId,
       eventType: 'watch',
       eventValue: secondsToSave,
-      category: category,
+      finalCategory: category,
       subCategory: subCategory,
     ).catchError((e) => debugPrint('Interaction error: $e'));
 
@@ -347,8 +347,9 @@ class _ReelItemState extends State<ReelItem> {
                         await InteractionService.logReactionInteraction(
                           reelId: widget.reelId,
                           reaction: reaction.toString(),
-                          category:
-                              widget.reelData['category']?.toString() ??
+                          finalCategory:
+                              widget.reelData['finalCategory']?.toString() ??
+                              widget.reelData['userCategory']?.toString() ??
                               'Other',
                           subCategory:
                               widget.reelData['subCategory']?.toString() ?? '',

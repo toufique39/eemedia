@@ -14,6 +14,7 @@ import 'package:eemedia/features/auth/screens/user_profile_screen.dart';
 import 'package:eemedia/features/home/student_home_screen.dart';
 import 'package:eemedia/features/professional/screens/analytics_screen.dart';
 import 'package:eemedia/features/professional/screens/manage_reels_screen.dart';
+import 'package:eemedia/providers/recommendation_provider.dart';
 import 'package:eemedia/providers/screen_time_provider.dart';
 import 'package:eemedia/providers/tracking_provider.dart';
 import 'package:eemedia/services/friend_requests_screen.dart';
@@ -25,7 +26,6 @@ import 'providers/auth_provider.dart';
 import 'features/auth/screens/login_screen.dart';
 import 'features/auth/screens/register_screen.dart';
 import 'features/auth/screens/account_type_screen.dart';
-
 import 'features/auth/screens/professional_screen.dart';
 import 'features/auth/screens/student_screen_time.dart';
 import 'features/auth/screens/tracking_screen.dart';
@@ -57,6 +57,8 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => MyAuthProvider()),
         ChangeNotifierProvider(create: (_) => TrackingProvider()),
         ChangeNotifierProvider(create: (_) => ScreenTimeProvider()),
+        ChangeNotifierProvider(create: (_) => RecommendationProvider()),
+       
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
@@ -67,7 +69,6 @@ class MyApp extends StatelessWidget {
         routes: {
           '/register': (context) => const RegisterScreen(),
           '/account-type': (context) => const AccountTypeScreen(),
-
           '/professional-dashboard': (context) => const ProfessionalScreen(),
           '/student-level': (context) => const StudentLevelScreen(),
           '/tracking': (context) => const TrackingScreen(),

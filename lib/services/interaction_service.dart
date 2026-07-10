@@ -9,7 +9,7 @@ class InteractionService {
     required String reelId,
     required String eventType,
     required num eventValue,
-    required String category,
+    required String finalCategory,
     required String subCategory,
   }) async {
     try {
@@ -25,7 +25,7 @@ class InteractionService {
         'itemId': reelId,
         'eventType': eventType,
         'eventValue': eventValue,
-        'category': category,
+        'finalCategory': finalCategory,
         'subCategory': subCategory,
         'timestamp': FieldValue.serverTimestamp(),
       });
@@ -45,7 +45,7 @@ class InteractionService {
   static Future<void> logReactionInteraction({
     required String reelId,
     required String reaction,
-    required String category,
+    required String finalCategory,
     required String subCategory,
   }) async {
     final reactionScore = _reactionScore(reaction);
@@ -54,7 +54,7 @@ class InteractionService {
       reelId: reelId,
       eventType: reaction,
       eventValue: reactionScore,
-      category: category,
+      finalCategory: finalCategory,
       subCategory: subCategory,
     );
   }
