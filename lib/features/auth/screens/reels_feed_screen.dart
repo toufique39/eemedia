@@ -198,10 +198,10 @@ class _ReelsFeedScreenState extends State<ReelsFeedScreen> {
             onRefresh: _loadFeedDependencies,
             color: Colors.white,
             child: PageView.builder(
-              controller: _pageController, // ✅
+              controller: _pageController,
               scrollDirection: Axis.vertical,
               itemCount: finalReels.length,
-              // ✅ current page track করো
+
               onPageChanged: (index) {
                 setState(() => _currentIndex = index);
               },
@@ -213,9 +213,9 @@ class _ReelsFeedScreenState extends State<ReelsFeedScreen> {
                   key: ValueKey(reelDoc.id),
                   reelId: reelDoc.id,
                   reelData: reelData,
-                  // ✅ শুধু current index active
+
                   isActive: widget.isActive && index == _currentIndex,
-                  // ✅ শুধু setState — reload না
+
                   onLimitReached: _handleLimitReached,
                 );
               },

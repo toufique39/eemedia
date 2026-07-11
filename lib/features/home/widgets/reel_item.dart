@@ -182,8 +182,7 @@ class _ReelItemState extends State<ReelItem> with WidgetsBindingObserver {
             }
             debugPrint("LIMIT REACHED = ${provider.limitReached}");
             debugPrint("SECONDS = ${provider.entertainmentSeconds}");
-          })
-          .catchError((e) => debugPrint('Screen time error: $e'));
+          });
     } else {
       ScreenTimeService.addWatchTime(
         finalcategory: category,
@@ -357,6 +356,7 @@ class _ReelItemState extends State<ReelItem> with WidgetsBindingObserver {
                   if (!mounted) return;
                   setState(() {});
                 },
+
                 icon: Text(
                   ReactionHelper.getReactionEmoji(myReaction),
 
@@ -368,8 +368,6 @@ class _ReelItemState extends State<ReelItem> with WidgetsBindingObserver {
                     context: context,
                     builder: (_) => ReactionPicker(
                       onReactionSelected: (reaction) async {
-                        if (!mounted) return;
-                        Navigator.pop(context);
                         await toggleReaction(
                           collection: 'reels',
                           documentId: widget.reelId,
@@ -392,8 +390,21 @@ class _ReelItemState extends State<ReelItem> with WidgetsBindingObserver {
                   );
                 },
               ),
-              Text(ReactionHelper.getReactionLabel(myReaction)),
-              Text("$reactionCount"),
+
+              Text(
+                "$reactionCount",
+                style: const TextStyle(
+                  color: Colors.red,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+
+              Text(
+                ReactionHelper.getReactionLabel(myReaction),
+                style: TextStyle(
+                  color: ReactionHelper.getReactionColor(myReaction),
+                ),
+              ),
 
               const SizedBox(height: 20),
               IconButton(

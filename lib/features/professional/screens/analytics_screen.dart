@@ -46,9 +46,51 @@ class AnalyticsScreen extends StatelessWidget {
               ),
 
               AnalyticsCard(
-                title: "Likes",
-                value: "${data['likes']}",
+                title: "Reactions",
+                value: "${data['totalReactions']}",
+                icon: Icons.emoji_emotions,
+              ),
+
+              AnalyticsCard(
+                title: "❤️ Love",
+                value: "${data['love']}",
                 icon: Icons.favorite,
+              ),
+
+              AnalyticsCard(
+                title: "👍 Like",
+                value: "${data['like']}",
+                icon: Icons.thumb_up,
+              ),
+
+              AnalyticsCard(
+                title: "🤣 Haha",
+                value: "${data['haha']}",
+                icon: Icons.sentiment_very_satisfied,
+              ),
+
+              AnalyticsCard(
+                title: "😮 Wow",
+                value: "${data['wow']}",
+                icon: Icons.emoji_emotions_outlined,
+              ),
+
+              AnalyticsCard(
+                title: "😢 Sad",
+                value: "${data['sad']}",
+                icon: Icons.sentiment_dissatisfied,
+              ),
+
+              AnalyticsCard(
+                title: "😡 Angry",
+                value: "${data['angry']}",
+                icon: Icons.mood_bad,
+              ),
+
+              AnalyticsCard(
+                title: "🐥 Polti",
+                value: "${data['polti']}",
+                icon: Icons.pets,
               ),
 
               AnalyticsCard(
