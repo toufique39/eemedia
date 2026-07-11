@@ -1,9 +1,9 @@
 import 'dart:async';
+import 'package:eemedia/features/home/widgets/reaction_helper.dart';
 import 'package:eemedia/features/home/widgets/reaction_picker.dart';
 import 'package:eemedia/providers/screen_time_provider.dart';
 import 'package:eemedia/services/interaction_service.dart';
 import 'package:eemedia/services/reaction_service.dart' as reaction_service;
-import 'package:eemedia/services/reel_service.dart';
 import 'package:eemedia/services/screen_time_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -39,10 +39,9 @@ class _ReelItemState extends State<ReelItem> with WidgetsBindingObserver {
   bool _isDisposed = false;
   bool _watchInteractionSaved = false;
   int _watchedSeconds = 0;
-  int likesCount = 0;
+
   int commentsCount = 0;
   int sharesCount = 0;
-  bool isLiked = false;
 
   @override
   void initState() {
@@ -50,10 +49,7 @@ class _ReelItemState extends State<ReelItem> with WidgetsBindingObserver {
     _player = Player();
     _videoController = VideoController(_player);
     WidgetsBinding.instance.addObserver(this);
-    final likesList = widget.reelData['likes'];
-    likesCount = likesList is List ? likesList.length : 0;
-    final currentUserId = FirebaseAuth.instance.currentUser?.uid ?? '';
-    isLiked = likesList is List && likesList.contains(currentUserId);
+
     commentsCount = widget.reelData['commentsCount'] ?? 0;
     sharesCount = widget.reelData['sharesCount'] ?? 0;
 
@@ -206,32 +202,6 @@ class _ReelItemState extends State<ReelItem> with WidgetsBindingObserver {
     debugPrint('WATCH SAVED → reel=$reelId, seconds=$secondsToSave');
   }
 
-  Future<void> toggleLike() async {
-    final currentUserId = FirebaseAuth.instance.currentUser?.uid ?? '';
-    if (currentUserId.isEmpty) return;
-
-    final oldIsLiked = isLiked;
-    setState(() {
-      isLiked = !isLiked;
-      likesCount += isLiked ? 1 : -1;
-    });
-
-    try {
-      await ReelService.toggleLike(
-        widget.reelId,
-        oldIsLiked ? [] : [currentUserId],
-      );
-    } catch (e) {
-      debugPrint('Like error: $e');
-      if (mounted) {
-        setState(() {
-          isLiked = oldIsLiked;
-          likesCount += oldIsLiked ? 1 : -1;
-        });
-      }
-    }
-  }
-
   Future<void> toggleReaction({
     required String collection,
     required String documentId,
@@ -267,6 +237,12 @@ class _ReelItemState extends State<ReelItem> with WidgetsBindingObserver {
 
   @override
   Widget build(BuildContext context) {
+    final currentUserId = FirebaseAuth.instance.currentUser?.uid ?? '';
+    final reactions = Map<String, dynamic>.from(
+      widget.reelData["reactions"] ?? {},
+    );
+    final myReaction = reactions[currentUserId];
+    final reactionCount = reactions.length;
     final postUser = widget.reelData['userData'] as Map<String, dynamic>? ?? {};
     final postUserName = postUser['name']?.toString() ?? 'Unknown User';
     final postUsername = postUser['username']?.toString() ?? '';
@@ -363,7 +339,30 @@ class _ReelItemState extends State<ReelItem> with WidgetsBindingObserver {
           child: Column(
             children: [
               IconButton(
-                onPressed: toggleLike,
+                onPressed: () async {
+                  await toggleReaction(
+                    collection: "reels",
+                    documentId: widget.reelId,
+                    reaction: "like",
+                  );
+                  await InteractionService.logReactionInteraction(
+                    reelId: widget.reelId,
+                    reaction: "like",
+                    finalCategory:
+                        widget.reelData["finalCategory"] ??
+                        widget.reelData["userCategory"] ??
+                        "Other",
+                    subCategory: widget.reelData["subCategory"] ?? "",
+                  );
+                  if (!mounted) return;
+                  setState(() {});
+                },
+                icon: Text(
+                  ReactionHelper.getReactionEmoji(myReaction),
+
+                  style: const TextStyle(fontSize: 30),
+                ),
+
                 onLongPress: () {
                   showDialog(
                     context: context,
@@ -376,9 +375,7 @@ class _ReelItemState extends State<ReelItem> with WidgetsBindingObserver {
                           documentId: widget.reelId,
                           reaction: reaction,
                         );
-                        final reactions = Map<String, dynamic>.from(
-                          widget.reelData["reactions"] ?? {},
-                        );
+
                         if (!mounted) return;
                         await InteractionService.logReactionInteraction(
                           reelId: widget.reelId,
@@ -394,13 +391,9 @@ class _ReelItemState extends State<ReelItem> with WidgetsBindingObserver {
                     ),
                   );
                 },
-                icon: Icon(
-                  isLiked ? Icons.favorite : Icons.favorite_border,
-                  color: isLiked ? Colors.red : Colors.white,
-                  size: 32,
-                ),
               ),
-              Text('$likesCount', style: const TextStyle(color: Colors.white)),
+              Text(ReactionHelper.getReactionLabel(myReaction)),
+              Text("$reactionCount"),
 
               const SizedBox(height: 20),
               IconButton(

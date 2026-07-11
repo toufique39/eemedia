@@ -4,7 +4,7 @@ import 'package:flutter/foundation.dart';
 
 class ScreenTimeService {
   static final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  static const int entertainmentLimitSeconds = 60;
+  static const int entertainmentLimitSeconds = 100;
 
   static String _todayKey() {
     final now = DateTime.now();
