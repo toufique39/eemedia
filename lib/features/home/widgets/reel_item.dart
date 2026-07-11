@@ -29,7 +29,7 @@ class ReelItem extends StatefulWidget {
   State<ReelItem> createState() => _ReelItemState();
 }
 
-class _ReelItemState extends State<ReelItem> {
+class _ReelItemState extends State<ReelItem> with WidgetsBindingObserver {
   late final Player _player;
   late final VideoController _videoController;
 
@@ -49,7 +49,7 @@ class _ReelItemState extends State<ReelItem> {
     super.initState();
     _player = Player();
     _videoController = VideoController(_player);
-
+    WidgetsBinding.instance.addObserver(this);
     final likesList = widget.reelData['likes'];
     likesCount = likesList is List ? likesList.length : 0;
     final currentUserId = FirebaseAuth.instance.currentUser?.uid ?? '';
@@ -58,6 +58,31 @@ class _ReelItemState extends State<ReelItem> {
     sharesCount = widget.reelData['sharesCount'] ?? 0;
 
     if (widget.isActive) _initializeAndPlayVideo();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    debugPrint("APP STATE = $state");
+
+    switch (state) {
+      case AppLifecycleState.resumed:
+        if (widget.isActive) {
+          _player.play();
+          _startWatchTimer();
+        }
+
+        break;
+
+      case AppLifecycleState.inactive:
+      case AppLifecycleState.paused:
+      case AppLifecycleState.hidden:
+      case AppLifecycleState.detached:
+        _player.pause();
+
+        _pauseAndSaveWatchData();
+
+        break;
+    }
   }
 
   @override
@@ -225,10 +250,18 @@ class _ReelItemState extends State<ReelItem> {
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+
     _isDisposed = true;
+
     _watchTimer?.cancel();
+
     _saveWatchData();
+
+    _player.pause();
+
     _player.dispose();
+
     super.dispose();
   }
 
@@ -403,7 +436,13 @@ class _ReelItemState extends State<ReelItem> {
           top: 10,
           child: BackButton(
             color: Colors.white,
-            onPressed: () => Navigator.pop(context),
+            onPressed: () {
+              _player.pause();
+
+              _pauseAndSaveWatchData();
+
+              Navigator.pop(context);
+            },
           ),
         ),
       ],
