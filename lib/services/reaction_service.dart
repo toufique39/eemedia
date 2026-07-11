@@ -44,16 +44,17 @@ Future<void> toggleReaction({
     await docRef.update({'reactions': reactions});
 
     if (ownerId != currentUser.uid && currentReaction != reaction) {
-      if (collection == 'posts') {
-        await createReactionNotification(
-          receiverId: ownerId,
-          senderId: currentUser.uid,
-          senderName: senderName,
-          postId: documentId,
-          reaction: reaction,
-        );
-      }
+      await createReactionNotification(
+        receiverId: ownerId,
 
+        senderId: currentUser.uid,
+
+        senderName: senderName,
+
+        postId: documentId,
+
+        reaction: reaction,
+      );
       // Reels notification later
     }
   } catch (e) {

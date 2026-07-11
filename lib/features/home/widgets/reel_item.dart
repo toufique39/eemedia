@@ -376,6 +376,9 @@ class _ReelItemState extends State<ReelItem> with WidgetsBindingObserver {
                           documentId: widget.reelId,
                           reaction: reaction,
                         );
+                        final reactions = Map<String, dynamic>.from(
+                          widget.reelData["reactions"] ?? {},
+                        );
                         if (!mounted) return;
                         await InteractionService.logReactionInteraction(
                           reelId: widget.reelId,
@@ -398,6 +401,7 @@ class _ReelItemState extends State<ReelItem> with WidgetsBindingObserver {
                 ),
               ),
               Text('$likesCount', style: const TextStyle(color: Colors.white)),
+
               const SizedBox(height: 20),
               IconButton(
                 onPressed: () => Navigator.pushNamed(
