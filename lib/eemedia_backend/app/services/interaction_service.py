@@ -13,7 +13,9 @@ def get_user_interactions(user_id: str):
         .stream()
     )
 
-    interactions = []
+    interactions = [
+
+    ]
 
     for doc in docs:
         interactions.append(doc.to_dict())
@@ -25,39 +27,56 @@ def _interaction_weight(event_type, event_value):
 
     event_type = event_type.lower()
 
+    # Watch Time
     if event_type == "watch":
 
         seconds = int(event_value)
 
         if seconds >= 60:
             return 10
-
         elif seconds >= 30:
             return 8
-
         elif seconds >= 15:
             return 5
-
         else:
             return 2
 
+    # Reactions
     if event_type == "like":
         return 6
 
-    if event_type == "comment":
+    if event_type == "love":
         return 8
 
-    if event_type == "share":
+    if event_type == "haha":
+        return 6
+
+    if event_type == "wow":
+        return 7
+
+    if event_type == "sad":
+        return 3
+
+    if event_type == "angry":
+        return -2
+
+    if event_type == "polti":
+        return 5
+
+    # Other interactions
+    if event_type == "comment":
         return 10
 
-    if event_type == "save":
+    if event_type == "share":
         return 12
+
+    if event_type == "save":
+        return 15
 
     if event_type == "skip":
         return -5
 
     return 0
-
 
 def aggregate_category_scores(interactions):
 
@@ -95,10 +114,16 @@ def aggregate_subcategory_scores(interactions):
             "Other",
         )
 
-        weight = _interaction_weight(
+        base_weight = _interaction_weight(
             interaction.get("eventType", ""),
             interaction.get("eventValue", 0),
         )
+
+        decay = _time_decay(
+            interaction.get("timestamp")
+        )
+
+        weight = base_weight * decay
 
         scores[sub] += weight
 
@@ -109,21 +134,38 @@ def build_user_profile(user_id):
 
     interactions = get_user_interactions(user_id)
 
-    return {
+    category_scores = aggregate_category_scores(
+        interactions,
+    )
 
-        "categories":
+    subcategory_scores = aggregate_subcategory_scores(
+        interactions,
+    )
 
-            aggregate_category_scores(
-                interactions,
-            ),
+    favorite_category = ""
 
-        "subCategories":
+    if category_scores:
+        favorite_category = max(
+            category_scores,
+            key=category_scores.get,
+        )
 
-            aggregate_subcategory_scores(
-                interactions,
-            ),
-
+    profile = {
+        "interactionCount": len(interactions),
+        "favoriteCategory": favorite_category,
+        "categories": category_scores,
+        "subCategories": subcategory_scores,
     }
+
+    print("\n========== USER PROFILE ==========")
+    print(f"Interactions : {len(interactions)}")
+    print(f"Favorite     : {favorite_category}")
+    print(f"Categories   : {category_scores}")
+    print(f"SubCategory  : {subcategory_scores}")
+    print("==================================\n")
+
+    return profile
+
 
 
 def _time_decay(timestamp):

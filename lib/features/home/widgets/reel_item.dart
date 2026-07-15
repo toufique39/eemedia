@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:eemedia/features/auth/screens/comment_screen.dart';
 import 'package:eemedia/features/home/widgets/reaction_helper.dart';
 import 'package:eemedia/features/home/widgets/reaction_picker.dart';
 import 'package:eemedia/providers/screen_time_provider.dart';
@@ -408,20 +409,21 @@ class _ReelItemState extends State<ReelItem> with WidgetsBindingObserver {
 
               const SizedBox(height: 20),
               IconButton(
-                onPressed: () => Navigator.pushNamed(
-                  context,
-                  '/comments',
-                  arguments: {
-                    'reelId': widget.reelId,
-                    'reelData': widget.reelData,
-                  },
-                ),
+                onPressed: () {
+                  showModalBottomSheet(
+                    context: context,
+                    isScrollControlled: true,
+                    backgroundColor: Colors.white,
+                    builder: (context) => CommentScreen(
+                      postId: widget.reelId,
+                      collection: 'reels',
+                      documentId: widget.reelId,
+                    ),
+                  );
+                },
                 icon: const Icon(Icons.comment, color: Colors.white, size: 32),
               ),
-              Text(
-                '$commentsCount',
-                style: const TextStyle(color: Colors.white),
-              ),
+
               const SizedBox(height: 20),
               IconButton(
                 onPressed: () => Navigator.pushNamed(

@@ -36,7 +36,7 @@ class _ReelsFeedScreenState extends State<ReelsFeedScreen> {
 
   @override
   void dispose() {
-    _pageController.dispose(); // ✅
+    _pageController.dispose();
     super.dispose();
   }
 
@@ -71,7 +71,6 @@ class _ReelsFeedScreenState extends State<ReelsFeedScreen> {
     }
 
     try {
-      // ✅ Future.wait সরিয়ে সরাসরি await
       final ids = await RecommendationApiService.getRecommendedReelIds(
         userId: user.uid,
         limit: 30,
@@ -140,7 +139,6 @@ class _ReelsFeedScreenState extends State<ReelsFeedScreen> {
     final screenProvider = context.watch<ScreenTimeProvider>();
     final recommendationProvider = context.watch<RecommendationProvider>();
 
-    // ✅ loading screen
     if (_isLoadingData) {
       return const Scaffold(
         backgroundColor: Colors.black,

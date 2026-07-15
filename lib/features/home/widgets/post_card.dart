@@ -521,7 +521,11 @@ class _PostCardState extends State<PostCard> {
                         return SizedBox(
                           height: MediaQuery.of(context).size.height * 0.8,
 
-                          child: CommentScreen(postId: widget.postId),
+                          child: CommentScreen(
+                            postId: widget.postId,
+                            collection: 'posts',
+                            documentId: widget.postId,
+                          ),
                         );
                       },
                     );

@@ -16,39 +16,65 @@ router = APIRouter(
 
 class RecommendationRequest(BaseModel):
 
-    user_id: str
-
-    limit: int = 30
+          user_id: str
+          limit: int = 20
+          debug: bool = False
 
 
 @router.post("/reels")
-
 def recommend_reels(
-
     request: RecommendationRequest,
-
 ):
 
-    reels = get_recommendations(
+    result = get_recommendations(
 
-        request.user_id,
+        user_id=request.user_id,
 
-        request.limit,
+        limit=request.limit,
+
+        debug=request.debug,
 
     )
+
+    if request.debug:
+
+        recommended_ids = []
+
+        for item in result["recommended"]:
+
+            recommended_ids.append({
+
+                "id": item["id"],
+
+                "score": item["score"],
+
+                "category": item["category"],
+
+                "subCategory": item["subCategory"],
+
+            })
+
+        return {
+
+            "recommended_reel_ids":
+                recommended_ids,
+
+            "debug":
+                result["debug"]
+
+        }
+
     recommended_ids = []
-    for item in reels:
 
-      recommended_ids.append(
+    for item in result:
 
-        item["id"]
+        recommended_ids.append(
+            item["id"]
+        )
 
-    )
-    
     return {
 
-    "recommended_reel_ids":
+        "recommended_reel_ids":
+            recommended_ids
 
-        recommended_ids
-
-}
+    }

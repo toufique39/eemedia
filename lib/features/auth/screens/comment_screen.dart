@@ -1,12 +1,20 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:eemedia/services/comment_service.dart';
+
 import 'package:flutter/material.dart';
 import 'package:eemedia/features/home/widgets/reply_widget.dart';
 
 class CommentScreen extends StatefulWidget {
   final String postId;
+  final String collection;
+  final String documentId;
 
-  const CommentScreen({super.key, required this.postId});
+  const CommentScreen({
+    super.key,
+    required this.postId,
+    required this.collection,
+    required this.documentId,
+  });
 
   @override
   State<CommentScreen> createState() => _CommentScreenState();
@@ -26,22 +34,11 @@ class _CommentScreenState extends State<CommentScreen> {
 
     if (text.isEmpty) return;
 
-    final currentUser = FirebaseAuth.instance.currentUser!;
-
-    final userDoc = await FirebaseFirestore.instance
-        .collection('users')
-        .doc(currentUser.uid)
-        .get();
-
-    final userData = userDoc.data() ?? {};
-
-    await FirebaseFirestore.instance.collection('comments').add({
-      'postId': widget.postId,
-      'userId': currentUser.uid,
-      'name': userData['name'] ?? 'Unknown',
-      'text': text,
-      'createdAt': FieldValue.serverTimestamp(),
-    });
+    await CommentService.addComment(
+      collection: widget.collection,
+      documentId: widget.documentId,
+      text: text,
+    );
 
     _commentController.clear();
   }
@@ -77,11 +74,10 @@ class _CommentScreenState extends State<CommentScreen> {
 
             Expanded(
               child: StreamBuilder<QuerySnapshot>(
-                stream: FirebaseFirestore.instance
-                    .collection('comments')
-                    .where('postId', isEqualTo: widget.postId)
-                    .orderBy('createdAt', descending: true)
-                    .snapshots(),
+                stream: CommentService.getComments(
+                  collection: widget.collection,
+                  documentId: widget.documentId,
+                ),
 
                 builder: (context, snapshot) {
                   if (!snapshot.hasData) {

@@ -5,12 +5,9 @@ import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 
 class RecommendationApiService {
-  // ✅ environment variable থেকে IP নাও
-
   static String get _baseUrl {
     if (kIsWeb) return 'http://localhost:8000';
 
-    // ✅ Real device এ PC এর IP
     if (Platform.isAndroid || Platform.isIOS) {
       return 'http://172.17.114.149:8000';
     }
@@ -20,8 +17,8 @@ class RecommendationApiService {
 
   static Future<List<String>> getRecommendedReelIds({
     required String userId,
-    int limit = 20,
-    int retries = 2, // ✅ retry
+    int limit = 50,
+    int retries = 2,
   }) async {
     for (int attempt = 0; attempt <= retries; attempt++) {
       try {
@@ -44,7 +41,6 @@ class RecommendationApiService {
 
         final data = jsonDecode(response.body) as Map<String, dynamic>;
 
-        // ✅ response structure validate করো
         if (!data.containsKey('recommended_reel_ids')) {
           debugPrint('Unexpected API response format: $data');
           return [];

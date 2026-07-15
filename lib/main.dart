@@ -58,7 +58,6 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => TrackingProvider()),
         ChangeNotifierProvider(create: (_) => ScreenTimeProvider()),
         ChangeNotifierProvider(create: (_) => RecommendationProvider()),
-       
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
@@ -86,11 +85,8 @@ class MyApp extends StatelessWidget {
               const UserProfileScreen(userId: '', userData: {}),
           '/chat-list': (context) => const ChatListScreen(),
           '/reels': (context) => const ReelsFeedScreen(isActive: true),
-          '/comments': (context) {
-            final postId =
-                ModalRoute.of(context)?.settings.arguments as String?;
-            return CommentScreen(postId: postId ?? '');
-          },
+          '/comment': (context) =>
+              const CommentScreen(postId: '', collection: '', documentId: ''),
           '/share': (context) => const ShareScreen(),
 
           '/manage-reels': (context) => const ManageReelsScreen(),
