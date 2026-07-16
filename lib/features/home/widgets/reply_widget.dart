@@ -4,9 +4,15 @@ import 'package:flutter/material.dart';
 
 class ReplyWidget extends StatefulWidget {
   final String commentId;
-  final String postId;
+  final String collection;
+  final String documentId;
 
-  const ReplyWidget({super.key, required this.commentId, required this.postId});
+  const ReplyWidget({
+    super.key,
+    required this.commentId,
+    required this.collection,
+    required this.documentId,
+  });
 
   @override
   State<ReplyWidget> createState() => _ReplyWidgetState();
@@ -39,7 +45,7 @@ class _ReplyWidgetState extends State<ReplyWidget> {
 
     await FirebaseFirestore.instance.collection('replies').add({
       'commentId': widget.commentId,
-      'postId': widget.postId,
+      'postId': widget.documentId,
       'userId': user.uid,
       'name': userData['name'] ?? 'Unknown',
       'text': text,
@@ -71,7 +77,6 @@ class _ReplyWidgetState extends State<ReplyWidget> {
               stream: FirebaseFirestore.instance
                   .collection('replies')
                   .where('commentId', isEqualTo: widget.commentId)
-                  .orderBy('createdAt')
                   .snapshots(),
 
               builder: (context, snapshot) {

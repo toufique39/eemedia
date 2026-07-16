@@ -415,7 +415,6 @@ class _ReelItemState extends State<ReelItem> with WidgetsBindingObserver {
                     isScrollControlled: true,
                     backgroundColor: Colors.white,
                     builder: (context) => CommentScreen(
-                      postId: widget.reelId,
                       collection: 'reels',
                       documentId: widget.reelId,
                     ),
@@ -423,6 +422,7 @@ class _ReelItemState extends State<ReelItem> with WidgetsBindingObserver {
                 },
                 icon: const Icon(Icons.comment, color: Colors.white, size: 32),
               ),
+              Text("${widget.reelData["commentCount"] ?? 0}"),
 
               const SizedBox(height: 20),
               IconButton(

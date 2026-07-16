@@ -1,9 +1,11 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
 
 class CommentService {
   static final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
+  /// ADD COMMENT
   static Future<void> addComment({
     required String collection,
     required String documentId,
@@ -12,7 +14,7 @@ class CommentService {
     final currentUser = FirebaseAuth.instance.currentUser!;
 
     final userDoc = await _firestore
-        .collection('users')
+        .collection("users")
         .doc(currentUser.uid)
         .get();
 
@@ -21,7 +23,7 @@ class CommentService {
     await _firestore
         .collection(collection)
         .doc(documentId)
-        .collection('comments')
+        .collection("comments")
         .add({
           "userId": currentUser.uid,
           "name": userData["name"] ?? "Unknown",
@@ -29,20 +31,30 @@ class CommentService {
           "text": text,
           "createdAt": FieldValue.serverTimestamp(),
         });
+
+    // Increment comment count
+    await _firestore.collection(collection).doc(documentId).update({
+      "commentCount": FieldValue.increment(1),
+    });
+
+    debugPrint("COLLECTION = $collection");
+    debugPrint("DOCUMENT = $documentId");
   }
 
+  /// STREAM COMMENTS
   static Stream<QuerySnapshot> getComments({
     required String collection,
     required String documentId,
   }) {
+    debugPrint("READ => $collection/$documentId/comments");
     return _firestore
         .collection(collection)
         .doc(documentId)
         .collection("comments")
-        .orderBy("createdAt", descending: true)
         .snapshots();
   }
 
+  /// DELETE COMMENT
   static Future<void> deleteComment({
     required String collection,
     required String documentId,
@@ -54,8 +66,13 @@ class CommentService {
         .collection("comments")
         .doc(commentId)
         .delete();
+
+    await _firestore.collection(collection).doc(documentId).update({
+      "commentCount": FieldValue.increment(-1),
+    });
   }
 
+  /// UPDATE COMMENT
   static Future<void> updateComment({
     required String collection,
     required String documentId,

@@ -86,7 +86,7 @@ class MyApp extends StatelessWidget {
           '/chat-list': (context) => const ChatListScreen(),
           '/reels': (context) => const ReelsFeedScreen(isActive: true),
           '/comment': (context) =>
-              const CommentScreen(postId: '', collection: '', documentId: ''),
+              const CommentScreen(collection: '', documentId: ''),
           '/share': (context) => const ShareScreen(),
 
           '/manage-reels': (context) => const ManageReelsScreen(),

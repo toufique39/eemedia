@@ -522,7 +522,6 @@ class _PostCardState extends State<PostCard> {
                           height: MediaQuery.of(context).size.height * 0.8,
 
                           child: CommentScreen(
-                            postId: widget.postId,
                             collection: 'posts',
                             documentId: widget.postId,
                           ),
@@ -531,7 +530,13 @@ class _PostCardState extends State<PostCard> {
                     );
                   },
 
-                  child: const Icon(Icons.comment_outlined),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(Icons.comment_outlined),
+                      Text(' ${widget.data['commentCount'] ?? 0}'),
+                    ],
+                  ),
                 ),
               ],
             ),

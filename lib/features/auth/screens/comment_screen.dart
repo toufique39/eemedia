@@ -5,13 +5,11 @@ import 'package:flutter/material.dart';
 import 'package:eemedia/features/home/widgets/reply_widget.dart';
 
 class CommentScreen extends StatefulWidget {
-  final String postId;
   final String collection;
   final String documentId;
 
   const CommentScreen({
     super.key,
-    required this.postId,
     required this.collection,
     required this.documentId,
   });
@@ -109,11 +107,10 @@ class _CommentScreenState extends State<CommentScreen> {
 
                             subtitle: Text(data['text'] ?? ''),
                           ),
-
                           ReplyWidget(
                             commentId: comments[index].id,
-
-                            postId: widget.postId,
+                            collection: widget.collection,
+                            documentId: widget.documentId,
                           ),
 
                           const Divider(),
