@@ -6,6 +6,7 @@ import 'package:eemedia/providers/screen_time_provider.dart';
 import 'package:eemedia/services/interaction_service.dart';
 import 'package:eemedia/services/reaction_service.dart' as reaction_service;
 import 'package:eemedia/services/screen_time_service.dart';
+import 'package:eemedia/services/view_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:media_kit/media_kit.dart';
@@ -33,7 +34,8 @@ class ReelItem extends StatefulWidget {
 class _ReelItemState extends State<ReelItem> with WidgetsBindingObserver {
   late final Player _player;
   late final VideoController _videoController;
-
+  bool _viewSaved = false;
+  Timer? _viewTimer;
   Timer? _watchTimer;
   bool isLoading = true;
   bool hasVideoError = false;
@@ -93,6 +95,7 @@ class _ReelItemState extends State<ReelItem> with WidgetsBindingObserver {
       } else {
         _player.play();
         _startWatchTimer();
+        _startViewTimer();
       }
     } else {
       _player.pause();
@@ -125,6 +128,7 @@ class _ReelItemState extends State<ReelItem> with WidgetsBindingObserver {
       if (widget.isActive) {
         await _player.play();
         _startWatchTimer();
+        _startViewTimer();
       }
 
       if (mounted) setState(() => isLoading = false);
@@ -149,8 +153,42 @@ class _ReelItemState extends State<ReelItem> with WidgetsBindingObserver {
     });
   }
 
+  void _startViewTimer() {
+    _viewTimer?.cancel();
+
+    _viewTimer = Timer(const Duration(seconds: 3), () async {
+      if (_viewSaved) return;
+
+      _viewSaved = true;
+
+      final added = await ViewService.addView(reelId: widget.reelId);
+
+      debugPrint("VIEW ADDED = $added");
+
+      if (!added) return;
+
+      await InteractionService.logInteraction(
+        reelId: widget.reelId,
+
+        eventType: "view",
+
+        eventValue: 1,
+
+        finalCategory:
+            widget.reelData["finalCategory"] ??
+            widget.reelData["userCategory"] ??
+            "Other",
+
+        subCategory: widget.reelData["subCategory"] ?? "",
+      );
+
+      debugPrint("VIEW INTERACTION SAVED");
+    });
+  }
+
   void _pauseAndSaveWatchData() {
     _watchTimer?.cancel();
+    _viewTimer?.cancel();
     _saveWatchData();
   }
 
@@ -218,6 +256,18 @@ class _ReelItemState extends State<ReelItem> with WidgetsBindingObserver {
     }
   }
 
+  String formatViews(int views) {
+    if (views >= 1000000) {
+      return "${(views / 1000000).toStringAsFixed(1)}M";
+    }
+
+    if (views >= 1000) {
+      return "${(views / 1000).toStringAsFixed(1)}K";
+    }
+
+    return views.toString();
+  }
+
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
@@ -231,6 +281,7 @@ class _ReelItemState extends State<ReelItem> with WidgetsBindingObserver {
     _player.pause();
 
     _player.dispose();
+    _viewTimer?.cancel();
 
     super.dispose();
   }
@@ -262,8 +313,19 @@ class _ReelItemState extends State<ReelItem> with WidgetsBindingObserver {
       children: [
         GestureDetector(
           onTap: () {
-            _player.state.playing ? _player.pause() : _player.play();
-            if (mounted) setState(() {});
+            if (_player.state.playing) {
+              _player.pause();
+
+              _viewTimer?.cancel();
+            } else {
+              _player.play();
+
+              _startViewTimer();
+            }
+
+            if (mounted) {
+              setState(() {});
+            }
           },
           child: Video(
             controller: _videoController,
@@ -338,6 +400,27 @@ class _ReelItemState extends State<ReelItem> with WidgetsBindingObserver {
           bottom: 90,
           child: Column(
             children: [
+              Column(
+                children: [
+                  const Icon(
+                    Icons.remove_red_eye,
+                    color: Colors.white,
+                    size: 30,
+                  ),
+
+                  const SizedBox(height: 4),
+
+                  Text(
+                    "${formatViews(widget.reelData["views"] ?? 0)}",
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 13,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+
               IconButton(
                 onPressed: () async {
                   await toggleReaction(
