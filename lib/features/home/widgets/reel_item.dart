@@ -3,6 +3,7 @@ import 'package:eemedia/features/auth/screens/comment_screen.dart';
 import 'package:eemedia/features/home/widgets/reaction_helper.dart';
 import 'package:eemedia/features/home/widgets/reaction_picker.dart';
 import 'package:eemedia/providers/screen_time_provider.dart';
+import 'package:eemedia/services/completion_service.dart';
 import 'package:eemedia/services/interaction_service.dart';
 import 'package:eemedia/services/reaction_service.dart' as reaction_service;
 import 'package:eemedia/services/screen_time_service.dart';
@@ -192,7 +193,7 @@ class _ReelItemState extends State<ReelItem> with WidgetsBindingObserver {
     _saveWatchData();
   }
 
-  void _saveWatchData() {
+  Future<void> _saveWatchData() async {
     if (_watchInteractionSaved || _watchedSeconds <= 0) return;
 
     final secondsToSave = _watchedSeconds;
@@ -201,7 +202,6 @@ class _ReelItemState extends State<ReelItem> with WidgetsBindingObserver {
         widget.reelData['finalCategory']?.toString() ??
         widget.reelData['userCategory']?.toString() ??
         'Other';
-    final subCategory = widget.reelData['subCategory']?.toString() ?? '';
     final reelId = widget.reelId;
     debugPrint(widget.reelData.toString());
     _watchedSeconds = 0;
@@ -229,12 +229,31 @@ class _ReelItemState extends State<ReelItem> with WidgetsBindingObserver {
       ).catchError((e) => debugPrint('Screen time error: $e'));
     }
 
-    InteractionService.logInteraction(
+    final totalSeconds = _player.state.duration.inSeconds;
+
+    final completion = await CompletionService.saveCompletion(
       reelId: reelId,
-      eventType: 'watch',
-      eventValue: secondsToSave,
-      finalCategory: category,
-      subCategory: subCategory,
+
+      watchedSeconds: secondsToSave,
+
+      totalSeconds: totalSeconds,
+    );
+
+    debugPrint("COMPLETION = ${completion.toStringAsFixed(1)}%");
+
+    await InteractionService.logInteraction(
+      reelId: reelId,
+
+      eventType: "completion",
+
+      eventValue: completion.round(),
+
+      finalCategory:
+          widget.reelData["finalCategory"] ??
+          widget.reelData["userCategory"] ??
+          "Other",
+
+      subCategory: widget.reelData["subCategory"] ?? "",
     ).catchError((e) => debugPrint('Interaction error: $e'));
 
     debugPrint('WATCH SAVED → reel=$reelId, seconds=$secondsToSave');

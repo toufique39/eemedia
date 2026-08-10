@@ -6,6 +6,15 @@ class SupabaseStorageService {
   static final _supabase = Supabase.instance.client;
 
   static Future<String?> uploadPostImage(File imageFile) async {
+    print("========== SUPABASE ==========");
+
+    print(_supabase.auth.currentSession);
+
+    print(_supabase.auth.currentSession);
+
+    print(_supabase.auth.currentUser);
+    print(_supabase.auth.currentSession?.accessToken);
+    print("==============================");
     try {
       final fileName = 'post_${DateTime.now().millisecondsSinceEpoch}.jpg';
 

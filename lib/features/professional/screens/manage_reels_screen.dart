@@ -17,7 +17,6 @@ class ManageReelsScreen extends StatelessWidget {
         stream: FirebaseFirestore.instance
             .collection("reels")
             .where("userId", isEqualTo: uid)
-            .orderBy("createdAt", descending: true)
             .snapshots(),
 
         builder: (context, snapshot) {

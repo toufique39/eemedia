@@ -75,9 +75,25 @@ def _interaction_weight(event_type, event_value):
 
     if event_type == "skip":
         return -5
+    if event_type == "completion":
+
+        percent = int(event_value)
+
+        if percent >= 90:
+            return 12
+
+        elif percent >= 70:
+            return 9
+
+        elif percent >= 50:
+            return 6
+
+        elif percent >= 30:
+            return 3
+
+        return 0
 
     return 0
-
 def aggregate_category_scores(interactions):
 
     scores = defaultdict(int)
@@ -85,8 +101,9 @@ def aggregate_category_scores(interactions):
     for interaction in interactions:
 
         category = interaction.get(
-            "category",
+            "finalCategory",
             "Other",
+            
         )
 
         base_weight = _interaction_weight(
@@ -94,8 +111,8 @@ def aggregate_category_scores(interactions):
             interaction.get("eventValue", 0),
         )
         decay = _time_decay(
-    interaction.get("timestamp")
-)
+            interaction.get("timestamp")
+        )
         weight = base_weight * decay
 
         scores[category] += weight
@@ -110,9 +127,9 @@ def aggregate_subcategory_scores(interactions):
     for interaction in interactions:
 
         sub = interaction.get(
-            "subCategory",
-            "Other",
-        )
+       "subCategory",
+      "",
+       ) 
 
         base_weight = _interaction_weight(
             interaction.get("eventType", ""),
