@@ -12,7 +12,7 @@ client = genai.Client(api_key=key)
 
 response = client.models.generate_content(
     model="gemini-3.6-flash",
-    contents="Hello"
+    contents="Hello toufique, how are you doing today? I hope you are having a great day!"
 )
 
 print(response.text)
