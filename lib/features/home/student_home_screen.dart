@@ -1,5 +1,6 @@
 import 'package:eemedia/features/auth/screens/presence_service.dart';
 import 'package:eemedia/features/home/widgets/story_strip.dart';
+import 'package:eemedia/services/post_privacy_service.dart';
 import 'package:eemedia/services/story_cleanup_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -15,7 +16,8 @@ class StudentHomeScreen extends StatefulWidget {
 
 class _StudentHomeScreenState extends State<StudentHomeScreen> {
   int _currentIndex = 0;
-
+  Set<String> _friendIds = {};
+  bool _loadingFriends = true;
   Map<String, dynamic>? currentUserData;
 
   bool isLoadingUser = true;
@@ -26,6 +28,7 @@ class _StudentHomeScreenState extends State<StudentHomeScreen> {
     StoryCleanupService.cleanupExpiredStories();
 
     loadCurrentUser();
+    loadFriendIds();
   }
 
   Future<void> loadCurrentUser() async {
@@ -50,6 +53,28 @@ class _StudentHomeScreenState extends State<StudentHomeScreen> {
 
       setState(() {
         isLoadingUser = false;
+      });
+    }
+  }
+
+  Future<void> loadFriendIds() async {
+    try {
+      final friendIds = await PostPrivacyService.getFriendIds();
+
+      if (!mounted) return;
+
+      setState(() {
+        _friendIds = friendIds;
+        _loadingFriends = false;
+      });
+    } catch (e) {
+      debugPrint('Friend Load Error: $e');
+
+      if (!mounted) return;
+
+      setState(() {
+        _friendIds = {};
+        _loadingFriends = false;
       });
     }
   }
@@ -295,13 +320,30 @@ class _StudentHomeScreenState extends State<StudentHomeScreen> {
                 if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
                   return const Center(child: Text("No posts yet"));
                 }
-                final posts = snapshot.data!.docs;
+                final allPosts = snapshot.data!.docs;
+
+                final visiblePosts = allPosts.where((doc) {
+                  final data = doc.data() as Map<String, dynamic>;
+
+                  return PostPrivacyService.canViewPost(
+                    postData: data,
+                    currentUserId: uid,
+                    friendIds: _friendIds,
+                  );
+                }).toList();
+
+                if (visiblePosts.isEmpty) {
+                  return const Center(child: Text("No posts available"));
+                }
 
                 return ListView.builder(
-                  itemCount: posts.length,
+                  itemCount: visiblePosts.length,
                   itemBuilder: (context, index) {
-                    final data = posts[index].data() as Map<String, dynamic>;
-                    return PostCard(postId: posts[index].id, data: data);
+                    final postDoc = visiblePosts[index];
+
+                    final data = postDoc.data() as Map<String, dynamic>;
+
+                    return PostCard(postId: postDoc.id, data: data);
                   },
                 );
               },

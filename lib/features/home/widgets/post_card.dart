@@ -20,6 +20,13 @@ class PostCard extends StatefulWidget {
 }
 
 class _PostCardState extends State<PostCard> {
+  Stream<DocumentSnapshot<Map<String, dynamic>>> _userStream(String userId) {
+    return FirebaseFirestore.instance
+        .collection('users')
+        .doc(userId)
+        .snapshots();
+  }
+
   Future<void> toggleLike(String postId) async {
     await toggleReaction(
       collection: 'posts',
@@ -321,13 +328,37 @@ class _PostCardState extends State<PostCard> {
             ListTile(
               contentPadding: EdgeInsets.zero,
 
-              leading: CircleAvatar(
-                radius: 24,
-                backgroundImage: NetworkImage(
-                  "https://ui-avatars.com/api/?name=$postUserName&background=random",
-                ),
-              ),
+              leading: StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
+                stream: _userStream(postOwnerId),
 
+                builder: (context, snapshot) {
+                  String? profileImageUrl;
+
+                  if (snapshot.hasData && snapshot.data!.exists) {
+                    final userData = snapshot.data!.data();
+
+                    profileImageUrl = userData?['profileImage']?.toString();
+
+                    if (profileImageUrl != null && profileImageUrl.isEmpty) {
+                      profileImageUrl = null;
+                    }
+                  }
+
+                  return CircleAvatar(
+                    radius: 24,
+
+                    backgroundColor: Colors.grey.shade300,
+
+                    backgroundImage: profileImageUrl != null
+                        ? NetworkImage(profileImageUrl)
+                        : null,
+
+                    child: profileImageUrl == null
+                        ? const Icon(Icons.person, color: Colors.grey)
+                        : null,
+                  );
+                },
+              ),
               title: Row(
                 children: [
                   Expanded(

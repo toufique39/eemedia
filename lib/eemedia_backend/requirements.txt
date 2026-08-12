@@ -3,3 +3,4 @@ gunicorn
 pydantic
 firebase-admin
 python-dotenv
+opencv-python

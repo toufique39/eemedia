@@ -1,0 +1,10 @@
+python -m venv .venv
+.venv\Scripts\activate
+
+
+cd C:\Users\jt\eemedia\lib\eemedia_backend
+
+astapi dev app/main.py
+
+uvicorn app.main:app --reload
+

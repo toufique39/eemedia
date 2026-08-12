@@ -24,6 +24,7 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
   Uint8List? webVideo;
   String? selectedCategory;
   String? selectedSubCategory;
+  String _visibility = "everyone";
 
   final List<String> reelCategories = ['Education', 'Entertainment'];
   final Map<String, List<String>> subCategories = {
@@ -217,6 +218,7 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
           'content': _controller.text.trim(),
           'imageUrl': imageUrl,
           'reactions': {},
+          'visibility': _visibility,
           'createdAt': FieldValue.serverTimestamp(),
         });
       }
@@ -281,7 +283,37 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
                   border: OutlineInputBorder(),
                 ),
               ),
-              const SizedBox(height: 15),
+
+              const SizedBox(height: 5),
+
+              Text(
+                "Who can see your post?",
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+              ),
+
+              RadioListTile<String>(
+                title: const Text("Everyone"),
+                value: "everyone",
+                groupValue: _visibility,
+                onChanged: (value) {
+                  setState(() {
+                    _visibility = value!;
+                  });
+                },
+              ),
+
+              RadioListTile<String>(
+                title: const Text("Friends"),
+                value: "friends",
+                groupValue: _visibility,
+                onChanged: (value) {
+                  setState(() {
+                    _visibility = value!;
+                  });
+                },
+              ),
+
+              const SizedBox(height: 5),
 
               DropdownButtonFormField<String>(
                 value: selectedCategory,
@@ -307,7 +339,7 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
               ),
 
               if (selectedCategory != null) ...[
-                const SizedBox(height: 15),
+                const SizedBox(height: 10),
 
                 DropdownButtonFormField<String>(
                   value: selectedSubCategory,

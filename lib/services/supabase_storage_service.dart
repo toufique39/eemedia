@@ -177,4 +177,80 @@ class SupabaseStorageService {
       return null;
     }
   }
+
+  static Future<String?> uploadProfileImageBytes(Uint8List bytes) async {
+    try {
+      final fileName = 'profile_${DateTime.now().millisecondsSinceEpoch}.jpg';
+
+      await _supabase.storage
+          .from('profiles')
+          .uploadBinary(
+            fileName,
+            bytes,
+            fileOptions: const FileOptions(
+              upsert: true,
+              contentType: 'image/jpeg',
+            ),
+          );
+
+      return _supabase.storage.from('profiles').getPublicUrl(fileName);
+    } catch (e) {
+      debugPrint('Profile Image Upload Error: $e');
+      return null;
+    }
+  }
+
+  static Future<String?> uploadCoverImageBytes(Uint8List bytes) async {
+    try {
+      final fileName = 'cover_${DateTime.now().millisecondsSinceEpoch}.jpg';
+
+      await _supabase.storage
+          .from('profiles')
+          .uploadBinary(
+            fileName,
+            bytes,
+            fileOptions: const FileOptions(
+              upsert: true,
+              contentType: 'image/jpeg',
+            ),
+          );
+
+      return _supabase.storage.from('profiles').getPublicUrl(fileName);
+    } catch (e) {
+      debugPrint('Cover Image Upload Error: $e');
+      return null;
+    }
+  }
+
+  static Future<void> deleteProfileImage(String imageUrl) async {
+    try {
+      final uri = Uri.parse(imageUrl);
+
+      if (uri.pathSegments.isEmpty) return;
+
+      final fileName = uri.pathSegments.last;
+
+      await _supabase.storage.from('profiles').remove([fileName]);
+
+      debugPrint('Profile image deleted: $fileName');
+    } catch (e) {
+      debugPrint('Delete profile image error: $e');
+    }
+  }
+
+  static Future<void> deleteCoverImage(String imageUrl) async {
+    try {
+      final uri = Uri.parse(imageUrl);
+
+      if (uri.pathSegments.isEmpty) return;
+
+      final fileName = uri.pathSegments.last;
+
+      await _supabase.storage.from('profiles').remove([fileName]);
+
+      debugPrint('Cover image deleted: $fileName');
+    } catch (e) {
+      debugPrint('Delete cover image error: $e');
+    }
+  }
 }

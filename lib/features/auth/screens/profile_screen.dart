@@ -75,11 +75,75 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
               return Column(
                 children: [
-                  CircleAvatar(
-                    radius: 30,
-                    backgroundImage: NetworkImage(
-                      "https://ui-avatars.com/api/?name=${data['name'] ?? 'User'}&background=random",
-                    ),
+                  Stack(
+                    clipBehavior: Clip.none,
+                    children: [
+                      // =========================
+                      // COVER PHOTO
+                      // =========================
+                      Container(
+                        height: 180,
+                        width: double.infinity,
+                        decoration: BoxDecoration(
+                          color: Colors.grey.shade300,
+                          borderRadius: const BorderRadius.only(
+                            bottomLeft: Radius.circular(12),
+                            bottomRight: Radius.circular(12),
+                          ),
+                          image:
+                              data['coverImage'] != null &&
+                                  data['coverImage'].toString().isNotEmpty
+                              ? DecorationImage(
+                                  image: NetworkImage(
+                                    data['coverImage'].toString(),
+                                  ),
+                                  fit: BoxFit.cover,
+                                )
+                              : null,
+                        ),
+                        child:
+                            data['coverImage'] == null ||
+                                data['coverImage'].toString().isEmpty
+                            ? const Center(
+                                child: Icon(
+                                  Icons.image,
+                                  size: 50,
+                                  color: Colors.grey,
+                                ),
+                              )
+                            : null,
+                      ),
+                      // =========================
+                      Positioned(
+                        left: 20,
+                        bottom: -45,
+                        child: Container(
+                          padding: const EdgeInsets.all(4),
+                          decoration: const BoxDecoration(
+                            color: Colors.white,
+                            shape: BoxShape.circle,
+                          ),
+                          child: CircleAvatar(
+                            radius: 45,
+                            backgroundColor: Colors.grey.shade300,
+                            backgroundImage:
+                                data['profileImage'] != null &&
+                                    data['profileImage'].toString().isNotEmpty
+                                ? NetworkImage(data['profileImage'].toString())
+                                : null,
+                            child:
+                                data['profileImage'] == null ||
+                                    data['profileImage'].toString().isEmpty
+                                ? const Icon(
+                                    Icons.person,
+                                    size: 45,
+                                    color: Colors.grey,
+                                  )
+                                : null,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
 
                   const SizedBox(height: 5),
