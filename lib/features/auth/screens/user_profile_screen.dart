@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:eemedia/features/auth/screens/chat_screen.dart';
+import 'package:eemedia/features/home/widgets/user_avatar.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:eemedia/services/friend_service.dart';
@@ -85,11 +86,10 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                   offset: const Offset(0, -50),
                   child: Column(
                     children: [
-                      CircleAvatar(
+                      UserAvatar(
+                        userId: widget.userId,
                         radius: 55,
-                        backgroundImage: NetworkImage(
-                          'https://ui-avatars.com/api/?name=$name&background=random',
-                        ),
+                        fallbackColor: Colors.black54,
                       ),
 
                       const SizedBox(height: 8),

@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:eemedia/features/auth/screens/user_profile_screen.dart';
+import 'package:eemedia/features/home/widgets/user_avatar.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:eemedia/services/friend_service.dart';
@@ -99,10 +100,10 @@ class _FriendRequestsScreenState extends State<FriendRequestsScreen> {
                                 vertical: 6,
                               ),
                               child: ListTile(
-                                leading: CircleAvatar(
-                                  backgroundImage: NetworkImage(
-                                    'https://ui-avatars.com/api/?name=${senderData['name'] ?? 'U'}&background=random',
-                                  ),
+                                leading: UserAvatar(
+                                  userId: senderId,
+                                  radius: 24,
+                                  fallbackColor: Colors.black54,
                                 ),
                                 title: Text(senderData['name'] ?? 'User'),
                                 subtitle: Text(
@@ -208,10 +209,10 @@ class _FriendRequestsScreenState extends State<FriendRequestsScreen> {
                             vertical: 6,
                           ),
                           child: ListTile(
-                            leading: CircleAvatar(
-                              backgroundImage: NetworkImage(
-                                'https://ui-avatars.com/api/?name=${data['name'] ?? 'U'}&background=random',
-                              ),
+                            leading: UserAvatar(
+                              userId: doc.id,
+                              radius: 24,
+                              fallbackColor: Colors.black54,
                             ),
                             title: Text(data['name'] ?? 'User'),
                             subtitle: Text('@${data['username'] ?? ''}'),

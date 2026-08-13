@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:eemedia/features/home/widgets/user_avatar.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'chat_screen.dart';
@@ -61,10 +62,10 @@ class ChatListScreen extends StatelessWidget {
                   final userName = userData['name'] ?? 'User';
 
                   return ListTile(
-                    leading: CircleAvatar(
-                      backgroundImage: NetworkImage(
-                        'https://ui-avatars.com/api/?name=$userName&background=random',
-                      ),
+                    leading: UserAvatar(
+                      userId: otherUserId,
+                      radius: 24,
+                      fallbackColor: Colors.black54,
                     ),
 
                     title: Text(userName),

@@ -99,9 +99,46 @@ class _CommentScreenState extends State<CommentScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           ListTile(
-                            leading: const CircleAvatar(
-                              child: Icon(Icons.person),
-                            ),
+                            leading:
+                                StreamBuilder<
+                                  DocumentSnapshot<Map<String, dynamic>>
+                                >(
+                                  stream: FirebaseFirestore.instance
+                                      .collection('users')
+                                      .doc(data['userId'])
+                                      .snapshots(),
+
+                                  builder: (context, snapshot) {
+                                    String? profileImageUrl;
+
+                                    if (snapshot.hasData &&
+                                        snapshot.data!.exists) {
+                                      final userData = snapshot.data!.data();
+
+                                      profileImageUrl =
+                                          userData?['profileImage']?.toString();
+
+                                      if (profileImageUrl != null &&
+                                          profileImageUrl.isEmpty) {
+                                        profileImageUrl = null;
+                                      }
+                                    }
+
+                                    return CircleAvatar(
+                                      radius: 20,
+                                      backgroundColor: Colors.grey.shade300,
+                                      backgroundImage: profileImageUrl != null
+                                          ? NetworkImage(profileImageUrl)
+                                          : null,
+                                      child: profileImageUrl == null
+                                          ? const Icon(
+                                              Icons.person,
+                                              color: Colors.grey,
+                                            )
+                                          : null,
+                                    );
+                                  },
+                                ),
 
                             title: Text(data['name'] ?? ''),
 

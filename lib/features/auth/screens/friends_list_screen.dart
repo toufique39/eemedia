@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:eemedia/features/auth/screens/user_profile_screen.dart';
+import 'package:eemedia/features/home/widgets/user_avatar.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
@@ -62,10 +63,10 @@ class FriendsListScreen extends StatelessWidget {
                   final username = data['username'] ?? '';
 
                   return ListTile(
-                    leading: CircleAvatar(
-                      backgroundImage: NetworkImage(
-                        'https://ui-avatars.com/api/?name=$name&background=random',
-                      ),
+                    leading: UserAvatar(
+                      userId: friendDoc.id,
+                      radius: 24,
+                      fallbackColor: Colors.black54,
                     ),
                     title: Text(name),
                     subtitle: Text('@$username'),

@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:eemedia/features/auth/screens/comment_screen.dart';
 import 'package:eemedia/features/home/widgets/reaction_helper.dart';
 import 'package:eemedia/features/home/widgets/reaction_picker.dart';
+import 'package:eemedia/features/home/widgets/user_avatar.dart';
 import 'package:eemedia/providers/screen_time_provider.dart';
 import 'package:eemedia/services/completion_service.dart';
 import 'package:eemedia/services/interaction_service.dart';
@@ -316,7 +317,6 @@ class _ReelItemState extends State<ReelItem> with WidgetsBindingObserver {
     final postUser = widget.reelData['userData'] as Map<String, dynamic>? ?? {};
     final postUserName = postUser['name']?.toString() ?? 'Unknown User';
     final postUsername = postUser['username']?.toString() ?? '';
-    final avatarUrl = postUser['imageUrl']?.toString() ?? '';
 
     if (hasVideoError) return const _VideoErrorView();
 
@@ -373,14 +373,10 @@ class _ReelItemState extends State<ReelItem> with WidgetsBindingObserver {
             children: [
               ListTile(
                 contentPadding: EdgeInsets.zero,
-                leading: CircleAvatar(
+                leading: UserAvatar(
+                  userId: widget.reelData['userId']?.toString() ?? '',
                   radius: 24,
-                  backgroundImage: avatarUrl.isNotEmpty
-                      ? NetworkImage(avatarUrl)
-                      : null,
-                  child: avatarUrl.isEmpty
-                      ? const Icon(Icons.person, color: Colors.white)
-                      : null,
+                  fallbackColor: Colors.black54,
                 ),
                 title: Text(
                   postUserName,

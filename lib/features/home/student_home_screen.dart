@@ -1,4 +1,4 @@
-import 'package:eemedia/features/auth/screens/presence_service.dart';
+import 'package:eemedia/services/presence_service.dart';
 import 'package:eemedia/features/home/widgets/story_strip.dart';
 import 'package:eemedia/services/post_privacy_service.dart';
 import 'package:eemedia/services/story_cleanup_service.dart';
@@ -29,6 +29,8 @@ class _StudentHomeScreenState extends State<StudentHomeScreen> {
 
     loadCurrentUser();
     loadFriendIds();
+
+    PresenceService().start();
   }
 
   Future<void> loadCurrentUser() async {

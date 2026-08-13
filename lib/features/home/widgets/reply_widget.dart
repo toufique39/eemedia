@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:eemedia/features/home/widgets/user_avatar.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
@@ -93,11 +94,11 @@ class _ReplyWidgetState extends State<ReplyWidget> {
                     return ListTile(
                       dense: true,
 
-                      leading: const CircleAvatar(
-                        radius: 14,
-                        child: Icon(Icons.person, size: 14),
+                      leading: UserAvatar(
+                        userId: data['userId']?.toString() ?? '',
+                        radius: 24,
+                        fallbackColor: Colors.black54,
                       ),
-
                       title: Text(data['name'] ?? ''),
 
                       subtitle: Text(data['text'] ?? ''),

@@ -1,7 +1,10 @@
+python -m venv .venv
+.venv\Scripts\activate
 
-git init
-git add README.md
-git commit -m "first commit"
-git branch -M main
-git remote add origin https://github.com/toufique39/eemedia.git
-git push -u origin main
+
+cd C:\Users\jt\eemedia\lib\eemedia_backend
+
+astapi dev app/main.py
+
+uvicorn app.main:app --reload
+

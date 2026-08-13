@@ -1,4 +1,5 @@
 import 'package:eemedia/features/auth/screens/user_profile_screen.dart';
+import 'package:eemedia/features/home/widgets/user_avatar.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
@@ -78,10 +79,10 @@ class _SearchScreenState extends State<SearchScreen> {
                         filteredUsers[index].data() as Map<String, dynamic>;
 
                     return ListTile(
-                      leading: CircleAvatar(
-                        backgroundImage: NetworkImage(
-                          "https://ui-avatars.com/api/?name=${data['name']}&background=random",
-                        ),
+                      leading: UserAvatar(
+                        userId: filteredUsers[index].id,
+                        radius: 24,
+                        fallbackColor: Colors.black54,
                       ),
 
                       title: Text(data['name'] ?? ""),

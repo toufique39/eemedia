@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:eemedia/features/auth/screens/create_story_screen.dart';
+import 'package:eemedia/features/home/widgets/user_avatar.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:eemedia/features/auth/screens/story_viewer_screen.dart';
@@ -71,9 +72,11 @@ class StoryStrip extends StatelessWidget {
                       children: [
                         Stack(
                           children: [
-                            const CircleAvatar(
-                              radius: 30,
-                              child: Icon(Icons.person),
+                            UserAvatar(
+                              userId:
+                                  FirebaseAuth.instance.currentUser?.uid ?? '',
+                              radius: 24,
+                              fallbackColor: Colors.black54,
                             ),
 
                             Positioned(

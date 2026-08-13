@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:eemedia/features/auth/screens/full_screen_image_screen.dart';
 import 'package:eemedia/features/home/widgets/reaction_helper.dart';
 import 'package:eemedia/features/home/widgets/reaction_picker.dart';
+import 'package:eemedia/features/home/widgets/user_avatar.dart';
 import 'package:eemedia/services/reaction_service.dart';
 import 'package:eemedia/services/supabase_storage_service.dart';
 import 'package:flutter/material.dart';
@@ -20,13 +21,6 @@ class PostCard extends StatefulWidget {
 }
 
 class _PostCardState extends State<PostCard> {
-  Stream<DocumentSnapshot<Map<String, dynamic>>> _userStream(String userId) {
-    return FirebaseFirestore.instance
-        .collection('users')
-        .doc(userId)
-        .snapshots();
-  }
-
   Future<void> toggleLike(String postId) async {
     await toggleReaction(
       collection: 'posts',
@@ -280,13 +274,13 @@ class _PostCardState extends State<PostCard> {
       ..sort((a, b) => b.value.compareTo(a.value));
 
     final topReactions = sortedReactions.take(3).map((e) => e.key).toList();
-    final postUser = widget.data['userData'] as Map<String, dynamic>? ?? {};
 
-    final postUserName = postUser['name'] ?? 'Unknown User';
+    final fallbackUser = widget.data['userData'] as Map<String, dynamic>? ?? {};
 
-    final postUsername = postUser['username'] ?? '';
+    final fallbackName = fallbackUser['name']?.toString() ?? 'Unknown User';
 
-    final isOnline = postUser['isOnline'] ?? false;
+    final fallbackUsername = fallbackUser['username']?.toString() ?? '';
+
     final imageUrl = widget.data['imageUrl'] as String?;
     final hasValidImage =
         imageUrl != null &&
@@ -325,93 +319,91 @@ class _PostCardState extends State<PostCard> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // 🔹 USER INFO
-            ListTile(
-              contentPadding: EdgeInsets.zero,
+            StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
+              stream: FirebaseFirestore.instance
+                  .collection('users')
+                  .doc(postOwnerId)
+                  .snapshots(),
 
-              leading: StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
-                stream: _userStream(postOwnerId),
+              builder: (context, userSnapshot) {
+                Map<String, dynamic> liveUserData = {};
 
-                builder: (context, snapshot) {
-                  String? profileImageUrl;
+                if (userSnapshot.hasData && userSnapshot.data!.exists) {
+                  liveUserData = userSnapshot.data!.data() ?? {};
+                }
 
-                  if (snapshot.hasData && snapshot.data!.exists) {
-                    final userData = snapshot.data!.data();
+                final postUserName =
+                    liveUserData['name']?.toString() ?? fallbackName;
 
-                    profileImageUrl = userData?['profileImage']?.toString();
+                final postUsername =
+                    liveUserData['username']?.toString() ?? fallbackUsername;
 
-                    if (profileImageUrl != null && profileImageUrl.isEmpty) {
-                      profileImageUrl = null;
-                    }
-                  }
+                final isOnline = liveUserData['isOnline'] == true;
 
-                  return CircleAvatar(
-                    radius: 24,
+                return ListTile(
+                  contentPadding: EdgeInsets.zero,
 
-                    backgroundColor: Colors.grey.shade300,
+                  leading: UserAvatar(userId: postOwnerId, radius: 24),
 
-                    backgroundImage: profileImageUrl != null
-                        ? NetworkImage(profileImageUrl)
-                        : null,
-
-                    child: profileImageUrl == null
-                        ? const Icon(Icons.person, color: Colors.grey)
-                        : null,
-                  );
-                },
-              ),
-              title: Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      postUserName,
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
+                  title: Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          postUserName,
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                          ),
+                        ),
                       ),
-                    ),
-                  ),
-                  Text(
-                    '${formatPostTime(widget.data['createdAt'])}'
-                    '${widget.data['updatedAt'] != null ? ' · Edited' : ''}',
 
-                    style: const TextStyle(fontSize: 12, color: Colors.grey),
-                  ),
+                      Text(
+                        '${formatPostTime(widget.data['createdAt'])}'
+                        '${widget.data['updatedAt'] != null ? ' · Edited' : ''}',
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: Colors.grey,
+                        ),
+                      ),
 
-                  IconButton(
-                    icon: const Icon(Icons.more_horiz),
-
-                    onPressed: () {
-                      showPostMenu(isMyPost);
-                    },
-                  ),
-                ],
-              ),
-
-              subtitle: Row(
-                children: [
-                  Text(
-                    '@$postUsername',
-                    style: TextStyle(color: Colors.grey.shade700),
+                      IconButton(
+                        icon: const Icon(Icons.more_horiz),
+                        onPressed: () {
+                          showPostMenu(isMyPost);
+                        },
+                      ),
+                    ],
                   ),
 
-                  const SizedBox(width: 8),
+                  subtitle: Row(
+                    children: [
+                      Text(
+                        '@$postUsername',
+                        style: TextStyle(color: Colors.grey.shade700),
+                      ),
 
-                  Icon(
-                    Icons.circle,
-                    size: 10,
-                    color: isOnline ? Colors.green : Colors.grey,
+                      const SizedBox(width: 8),
+
+                      Icon(
+                        Icons.circle,
+                        size: 10,
+                        color: isOnline ? Colors.green : Colors.grey,
+                      ),
+
+                      const SizedBox(width: 4),
+
+                      Text(
+                        isOnline ? 'Online' : 'Offline',
+                        style: TextStyle(
+                          color: Colors.grey.shade700,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ],
                   ),
-
-                  const SizedBox(width: 4),
-
-                  Text(
-                    isOnline ? 'Online' : 'Offline',
-                    style: TextStyle(color: Colors.grey.shade700, fontSize: 12),
-                  ),
-                ],
-              ),
+                );
+              },
             ),
-
             const SizedBox(height: 16),
 
             // 🔹 Post Content

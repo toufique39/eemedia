@@ -1,5 +1,5 @@
 import 'package:eemedia/features/auth/screens/login_screen.dart';
-import 'package:eemedia/features/auth/screens/presence_service.dart';
+import 'package:eemedia/services/presence_service.dart';
 import 'package:eemedia/features/home/widgets/post_card.dart';
 import 'package:eemedia/features/professional/screens/professional_dashboard_screen.dart';
 import 'package:eemedia/services/screen_time_service.dart';
