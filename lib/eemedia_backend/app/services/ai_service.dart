@@ -4,7 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 
 class AiService {
-  static const String baseUrl = "http://127.0.0.1:8000";
+  static const String baseUrl = "https://eemedia-backend.onrender.com";
 
   static Future<void> classifyReel({
     required String reelId,
@@ -22,6 +22,7 @@ class AiService {
         headers: {"Content-Type": "application/json"},
         body: jsonEncode({"reel_id": reelId, "video_url": videoUrl}),
       );
+      //checking
 
       debugPrint("Status Code = ${response.statusCode}");
       debugPrint("Response = ${response.body}");

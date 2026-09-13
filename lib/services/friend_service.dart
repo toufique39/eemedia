@@ -90,25 +90,38 @@ Future<void> acceptFriendRequest(String requestId) async {
 
   final requestDoc = await requestRef.get();
 
-  if (!requestDoc.exists) return;
+  if (!requestDoc.exists) {
+    throw Exception('Friend request not found');
+  }
 
-  final data = requestDoc.data() as Map<String, dynamic>;
+  final data = requestDoc.data();
 
-  final senderId = data['senderId'];
-  final receiverId = data['receiverId'];
+  if (data == null) {
+    throw Exception('Friend request data not found');
+  }
 
-  // 1. Update request status
+  final senderId = data['senderId']?.toString();
+  final receiverId = data['receiverId']?.toString();
+
+  if (senderId == null ||
+      receiverId == null ||
+      senderId.isEmpty ||
+      receiverId.isEmpty) {
+    throw Exception('Invalid friend request data');
+  }
+
+  // Mark request as accepted
   await requestRef.update({'status': 'accepted'});
 
-  // 2. Add sender to receiver's friends list
-  await FirebaseFirestore.instance.collection('users').doc(receiverId).update({
+  // Add sender to receiver's friends
+  await FirebaseFirestore.instance.collection('users').doc(receiverId).set({
     'friends': FieldValue.arrayUnion([senderId]),
-  });
+  }, SetOptions(merge: true));
 
-  // 3. Add receiver to sender's friends list
-  await FirebaseFirestore.instance.collection('users').doc(senderId).update({
+  // Add receiver to sender's friends
+  await FirebaseFirestore.instance.collection('users').doc(senderId).set({
     'friends': FieldValue.arrayUnion([receiverId]),
-  });
+  }, SetOptions(merge: true));
 }
 
 Future<void> rejectFriendRequest(String requestId) async {

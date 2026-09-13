@@ -29,8 +29,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   Uint8List? _profileImageBytes;
   Uint8List? _coverImageBytes;
 
-  bool _uploadingProfileImage = false;
-  bool _uploadingCoverImage = false;
 
   final professionController = TextEditingController();
   final organizationController = TextEditingController();
@@ -138,17 +136,13 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       String? coverImageUrl;
 
       if (_profileImage != null && _profileImageBytes != null) {
-        setState(() {
-          _uploadingProfileImage = true;
-        });
+        setState(() {});
 
         profileImageUrl = await SupabaseStorageService.uploadProfileImageBytes(
           _profileImageBytes!,
         );
 
-        setState(() {
-          _uploadingProfileImage = false;
-        });
+        setState(() {});
 
         if (profileImageUrl == null) {
           throw Exception("Profile image upload failed");
@@ -160,17 +154,13 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       }
 
       if (_coverImage != null && _coverImageBytes != null) {
-        setState(() {
-          _uploadingCoverImage = true;
-        });
+        setState(() {});
 
         coverImageUrl = await SupabaseStorageService.uploadCoverImageBytes(
           _coverImageBytes!,
         );
 
-        setState(() {
-          _uploadingCoverImage = false;
-        });
+        setState(() {});
 
         if (coverImageUrl == null) {
           throw Exception("Cover image upload failed");
@@ -233,8 +223,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       if (mounted) {
         setState(() {
           isLoading = false;
-          _uploadingProfileImage = false;
-          _uploadingCoverImage = false;
         });
       }
     }
