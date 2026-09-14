@@ -29,7 +29,6 @@ class _StudentHomeScreenState extends State<StudentHomeScreen> {
 
     loadCurrentUser();
     loadFriendIds();
-
     PresenceService().start();
   }
 

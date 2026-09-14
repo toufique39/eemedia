@@ -7,7 +7,7 @@ from app.api.recommendation_routes import router as recommendation_router
 
 app = FastAPI(
     title="EEmedia Backend API",
-    description="AI Powered Social Media Backend",
+    description="AI Based Ethical Emotion Social Media Backend",
     version="1.0.0",
 )
 

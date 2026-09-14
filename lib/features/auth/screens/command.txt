@@ -4,6 +4,26 @@ python -m venv .venv
 
 cd C:\Users\jt\eemedia\lib\eemedia_backend
 
+তোমার EEmedia FastAPI backend চালানোর command:
+
+python -m uvicorn app.main:app --reload
+
+Production-style local run করতে:
+
+python -m uvicorn app.main:app --host 0.0.0.0 --port 8000
+
+Backend folder-এ গিয়ে চালাবে, যেমন:
+
+cd C:\Users\jt\eemedia_backend
+python -m uvicorn app.main:app --reload
+
+তারপর browser-এ:
+
+http://127.0.0.1:8000
+
+Swagger:
+
+http://127.0.0.1:8000/docs
 astapi dev app/main.py
 
 uvicorn app.main:app --reload

@@ -11,13 +11,13 @@ def calculate_trending_score(reel):
 
     views = reel.get("views", 0)
 
-    if views >= 30:
+    if views >= 10:
         score += 8
 
-    elif views >= 20:
+    elif views >= 7:
         score += 6
 
-    elif views >= 10:
+    elif views >= 6:
         score += 4
 
     elif views >= 5:
@@ -31,10 +31,10 @@ def calculate_trending_score(reel):
 
     reaction_count = len(reactions)
 
-    if reaction_count >= 20:
+    if reaction_count >= 10:
         score += 6
 
-    elif reaction_count >= 10:
+    elif reaction_count >= 7:
         score += 4
 
     elif reaction_count >= 5:
@@ -46,10 +46,10 @@ def calculate_trending_score(reel):
 
     comment_count = reel.get("commentCount", 0)
 
-    if comment_count >= 10:
+    if comment_count >= 5:
         score += 6
 
-    elif comment_count >= 5:
+    elif comment_count >= 4:
         score += 4
 
     elif comment_count >= 3:
@@ -72,12 +72,12 @@ def calculate_trending_score(reel):
         ).days
 
         if days == 0:
-            score += 5
+            score += 10
 
         elif days <= 3:
-            score += 3
+            score += 7
 
         elif days <= 6:
-            score += 2
+            score += 5
 
     return score
